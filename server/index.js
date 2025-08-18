@@ -10,7 +10,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(cors({ origin: 'http://localhost:4200', credentials: true }));
 
-const USERS = [{ id: 1, email: 'admin@example.com', password: '1234', role: 'admin' }];
+const USERS = [{ id: 1, email: 'admin@example.com', password: 'ChangeMeNow!', role: 'admin' }];
 
 function sign(payload) {
     return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '15m' });

@@ -26,7 +26,7 @@ import { AuthService } from '../auth.service';
 })
 export class LoginComponent {
   email = 'admin@example.com';
-  password = '1234';
+  password = 'ChangeMeNow!';
   error = '';
   constructor(private auth: AuthService, private router: Router) {}
   submit() {

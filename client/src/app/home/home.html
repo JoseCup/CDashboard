@@ -1,0 +1,10 @@
+<h1>Welcome to CDashboard</h1>
+<p>Quick links for testing:</p>
+<ul>
+  <li><a routerLink="/login">Login Page</a></li>
+  <li><a routerLink="/account">Account Page</a></li>
+  <li>
+    <button (click)="checkMe()">Call /api/me</button>
+    <pre *ngIf="me">{{ me | json }}</pre>
+  </li>
+</ul>
