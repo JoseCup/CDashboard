@@ -1,0 +1,48 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Angular build output
+client/dist/
+client/.angular/
+client/.angular/cache/
+
+# Angular environment files (if you use them)
+client/src/environments/environment.*.ts
+
+# Server build/output
+server/dist/
+server/*.log
+
+# Logs
+logs
+*.log
+*.out
+*.err
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# dotenv environment files
+server/.env
+.env
+
+# Coverage / tests
+coverage/
+*.lcov
+
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS junk
+.DS_Store
+Thumbs.db
