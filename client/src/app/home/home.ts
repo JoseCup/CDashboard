@@ -20,4 +20,9 @@ export class HomeComponent {
       error: (err) => (this.me = err.error || { error: 'Unauthorized' }),
     });
   }
+  logout() {
+    this.http.post('/api/logout', {}, { withCredentials: true }).subscribe(() => {
+      this.me = null;
+    });
+  }
 }

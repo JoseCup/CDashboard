@@ -10,7 +10,9 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(cors({ origin: 'http://localhost:4200', credentials: true }));
 
-const USERS = [{ id: 1, email: 'admin@example.com', password: 'ChangeMeNow!', role: 'admin' }];
+const USERS = [{ id: 1, email: 'admin@example.com', password: 'ChangeMeNow!', role: 'admin', name: 'Jose' },
+{ id: 2, email: 'client@example.com', password: 'ChangeMeNow!', role: 'client', name: 'Client' }
+];
 
 function sign(payload) {
     return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '15m' });
@@ -28,7 +30,13 @@ app.post('/api/login', (req, res) => {
     const { email, password } = req.body || {};
     const user = USERS.find(u => u.email === email && u.password === password);
     if (!user) return res.status(401).json({ message: 'Bad credentials' });
-    const token = sign({ id: user.id, email: user.email, role: user.role });
+    // Adding name to the token payload
+    const token = sign({
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        name: user.name
+    });
     res.cookie('token', token, {
         httpOnly: true, sameSite: 'lax',
         secure: process.env.NODE_ENV === 'production',

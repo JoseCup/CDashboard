@@ -1,1 +1,10 @@
-<p>account works!</p>
+<ng-container *ngIf="me$ | async as me; else loading">
+  <h2>Hello, {{ me.name }} 👋</h2>
+  <p><b>Email:</b> {{ me.email }}</p>
+  <p><b>Role:</b> {{ me.role }}</p>
+  <p><a routerLink="/">Home</a></p>
+
+  <button (click)="logout()">Logout</button>
+</ng-container>
+
+<ng-template #loading>Loading…</ng-template>
