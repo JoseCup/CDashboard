@@ -46,3 +46,6 @@ coverage/
 # OS junk
 .DS_Store
 Thumbs.db
+
+# Google Cloud service account keys
+/server/keys/*.json

@@ -45,6 +45,42 @@ app.post('/api/login', (req, res) => {
     res.json({ message: 'ok' });
 });
 
+// ga4 analytics 
+const { BetaAnalyticsDataClient } = require('@google-analytics/data');
+const path = require('path');
+
+const analyticsClient = new BetaAnalyticsDataClient({
+    keyFilename: path.join(__dirname, 'keys/analytics-key.json'),
+});
+
+// Example endpoint: get pageviews in last 7 days
+app.get('/api/stats', verifyToken, async (req, res) => {
+    try {
+        const [response] = await analyticsClient.runReport({
+        property: `properties/${process.env.GA4_PROPERTY_ID}`,
+        dateRanges: [
+            { startDate: '30daysAgo', endDate: 'today' },     // current
+        ],
+        dimensions: [
+            { name: 'landingPage' },
+            { name: 'pageTitle' }
+        ],
+        metrics: [
+            { name: 'sessions' },
+            { name: 'newUsers' }
+        ],
+        limit: 10,
+            orderBys: [{ desc: true, metric: { metricName: 'sessions' } }]
+        });
+
+        res.json(response);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to fetch GA stats' });
+    }
+});
+
+
 app.post('/api/logout', (req, res) => {
     res.clearCookie('token', { sameSite: 'lax', secure: process.env.NODE_ENV === 'production' });
     res.json({ message: 'logged out' });
