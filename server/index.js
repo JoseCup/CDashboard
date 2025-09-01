@@ -62,15 +62,16 @@ app.get('/api/stats', verifyToken, async (req, res) => {
             { startDate: '30daysAgo', endDate: 'today' },     // current
         ],
         dimensions: [
+            { name: 'date' },   // dimensionalValues[0]
             { name: 'landingPage' },
-            { name: 'pageTitle' }
-        ],
-        metrics: [
-            { name: 'sessions' },
-            { name: 'newUsers' }
-        ],
+            { name: 'pageTitle' },
+            { name: 'sessionDefaultChannelGroup' }
+            ],
+            metrics: [
+            { name: 'activeUsers' }
+            ],
         limit: 10,
-            orderBys: [{ desc: true, metric: { metricName: 'sessions' } }]
+            orderBys: [{ desc: true, metric: { metricName: 'activeUsers' } }]
         });
 
         res.json(response);

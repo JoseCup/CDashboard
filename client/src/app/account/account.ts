@@ -2,16 +2,22 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { BaseChartDirective } from 'ng2-charts';
+import { ChartConfiguration } from 'chart.js';
+
+// import jsPDF from 'jspdf';
+// import html2canvas from 'html2canvas';
 
 @Component({
   selector: 'app-account',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, BaseChartDirective],
   template: `
     <h1>My Google Analytics Stats</h1>
     <h2>Metrics by Landing Page</h2>
 
     <!-- Dynamic table -->
+    <div #printSection>
     <table *ngIf="stats?.rows; else loading" border="1" cellpadding="6">
     <caption> Data from the last 30 days </caption>
       <thead>
@@ -39,34 +45,86 @@ import { HttpClient } from '@angular/common/http';
         </tr>
       </tbody>
     </table>
+    <h3> Over time summary </h3>
+    <h3>Sessions Over Time</h3>
+    <canvas baseChart
+      [data]="lineChartData"
+      [options]="lineChartOptions"
+      [type]="'line'">
+    </canvas>
+
+    <!-- Pie Chart (channel mix) -->
+    <h3>Traffic Sources</h3>
+    <canvas baseChart
+      [data]="pieChartData"
+      [type]="'pie'">
+    </canvas>
+
+    </div>
 
    
     <ng-template #loading> Loading stats... </ng-template>
   `,
 })
+
 export class AccountComponent implements OnInit {
   stats: any;
+
+  // Chart configs
+  lineChartData: ChartConfiguration<'line'>['data'] = { labels: [], datasets: [] };
+  lineChartOptions: ChartConfiguration<'line'>['options'] = { responsive: true };
+  pieChartData: ChartConfiguration<'pie'>['data'] = { labels: [], datasets: [] };
 
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
-    this.http.get('/api/stats').subscribe({
-      next: (data) => (this.stats = data),
-      error: (err) => (this.stats = err.error || { error: 'Unauthorized' }),
+    this.http.get<any>('/api/stats').subscribe({
+      next: (data) => {
+        this.stats = data;
+
+        // 🔹 Build line chart from GA "date" dimension + activeUsers metric
+        const dates = data.rows.map((r: any) => this.formatDate(r.dimensionValues[0].value));
+        const activeUsers = data.rows.map((r: any) => Number(r.metricValues[0].value));
+
+        this.lineChartData = {
+          labels: dates,
+          datasets: [
+            {
+              label: 'Active Users',
+              data: activeUsers,
+              borderColor: '#42A5F5',
+              backgroundColor: 'rgba(66,165,245,0.2)',
+              fill: true,
+              tension: 0.3
+            }
+          ]
+        };
+
+        // 🔹 Build pie chart from GA "sessionDefaultChannelGroup" dimension + activeUsers
+        const channels = data.rows.map((r: any) => r.dimensionValues[1].value); // sessionDefaultChannelGroup
+        const channelUsers = data.rows.map((r: any) => Number(r.metricValues[0].value));
+
+        this.pieChartData = {
+          labels: channels,
+          datasets: [
+            {
+              data: channelUsers,
+              backgroundColor: ['#42A5F5','#66BB6A','#FFA726','#AB47BC','#FF7043']
+            }
+          ]
+        };
+      },
+      error: (err) => (this.stats = err.error || { error: 'Unauthorized' })
     });
   }
 
   // helper: GA dates come as "YYYYMMDD" (e.g. 20250818 → 2025-08-18)
   // account.component.ts
   formatDate(gaDate: string): string {
-    if (!gaDate) return '';
-    // GA4 date is YYYYMMDD → turn into YYYY-MM-DD
-    const year = gaDate.substring(0, 4);
-    const month = gaDate.substring(4, 6);
-    const day = gaDate.substring(6, 8);
-    const jsDate = new Date(`${year}-${month}-${day}`);
-    return jsDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  }
+      if (!gaDate || gaDate.length !== 8) return gaDate;
+      return `${gaDate.substring(0,4)}-${gaDate.substring(4,6)}-${gaDate.substring(6,8)}`;
+    }
+    
   formatNumber(numStr: string): string {
     // Handle empty or non-numeric strings
     if (!numStr) return '';
@@ -79,7 +137,7 @@ export class AccountComponent implements OnInit {
     }
 
     // For floats: 3 significant figures
-    return Number.parseFloat(num.toFixed(2)).toString();
+    return Number.parseFloat(num.toFixed(3)).toString();
   }
 
   getChange(row: any): string {
@@ -96,7 +154,4 @@ export class AccountComponent implements OnInit {
     if (isNaN(current) || isNaN(previous)) return 'black';
     return current >= previous ? 'green' : 'red';
   }
-
-
 }
-
