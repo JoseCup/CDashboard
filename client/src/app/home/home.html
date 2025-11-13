@@ -7,5 +7,6 @@
     <button (click)="checkMe()">Call /api/me</button>
     <pre *ngIf="me">{{ me | json }}</pre>
   </li>
-  <li><button (click)="logout()">Log Out</button></li>
+  <li><button class="btn btn-secondary" (click)="logout()">Log Out</button></li>
+  
 </ul>

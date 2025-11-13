@@ -53,7 +53,7 @@ const analyticsClient = new BetaAnalyticsDataClient({
     keyFilename: path.join(__dirname, 'keys/analytics-key.json'),
 });
 
-// Example endpoint: get pageviews in last 7 days
+// Example endpoint: get pageviews in last 30 days
 app.get('/api/stats', verifyToken, async (req, res) => {
     try {
         const [response] = await analyticsClient.runReport({
@@ -62,16 +62,18 @@ app.get('/api/stats', verifyToken, async (req, res) => {
             { startDate: '30daysAgo', endDate: 'today' },     // current
         ],
         dimensions: [
-            { name: 'date' },   // dimensionalValues[0]
+            // { name: 'date' },   // dimensionalValues[0]
             { name: 'landingPage' },
-            { name: 'pageTitle' },
+            // { name: 'pageTitle' },
             { name: 'sessionDefaultChannelGroup' }
             ],
             metrics: [
-            { name: 'activeUsers' }
+            { name: 'sessions' },
+            { name: 'bounceRate' },
+            { name: 'newUsers' }
             ],
-        limit: 10,
-            orderBys: [{ desc: true, metric: { metricName: 'activeUsers' } }]
+        limit: 5,
+            orderBys: [{ desc: true, metric: { metricName: 'sessions' } }]
         });
 
         res.json(response);
