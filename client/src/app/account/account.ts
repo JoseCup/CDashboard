@@ -7,42 +7,9 @@ import { HttpClient } from '@angular/common/http';
   selector: 'app-account',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  template: `
-    <h1>My Google Analytics Stats</h1>
-    <h2>Metrics by Landing Page</h2>
+  templateUrl: './account.html',
+  styleUrls: ['./account.css'],
 
-    <!-- Dynamic table -->
-    <table *ngIf="stats?.rows; else loading" border="1" cellpadding="6">
-    <caption> Data from the last 30 days </caption>
-      <thead>
-        <tr>
-          <!-- Render dimension headers -->
-          <th *ngFor="let d of stats.dimensionHeaders">
-            {{ d.name }}
-          </th>
-          <!-- Render metric headers -->
-          <th *ngFor="let m of stats.metricHeaders">
-            {{ m.name }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let row of stats.rows">
-          <!-- Render dimension values -->
-          <td *ngFor="let d of row.dimensionValues; let i = index">
-            {{ stats.dimensionHeaders[i].name === 'date' ? formatDate(d.value) : d.value }}
-          </td>
-          <!-- Render metric values -->
-          <td *ngFor="let m of row.metricValues">
-            {{ formatNumber(m.value) }}
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-   
-    <ng-template #loading> Loading stats... </ng-template>
-  `,
 })
 export class AccountComponent implements OnInit {
   stats: any;
