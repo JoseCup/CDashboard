@@ -11,65 +11,42 @@ import { ChartConfiguration } from 'chart.js';
 @Component({
   selector: 'app-account',
   standalone: true,
-  imports: [CommonModule, RouterModule, BaseChartDirective],
+  imports: [CommonModule, RouterModule],
   template: `
-    <div class="container my-4">
-    <h2 class="mb-4">My Google Analytics Stats</h2>
+    <h1>My Google Analytics Stats</h1>
+    <h2>Metrics by Landing Page</h2>
 
-    <!-- Row for charts -->
-    <div class="row mb-4">
-      <div class="mx-auto col-lg-10 col-md-6">
-        <div class="card shadow-sm">
-          <div class="card-header">Sessions Over Time</div>
-          <div class="card-body">
-            <canvas baseChart
-              [data]="lineChartData"
-              [options]="lineChartOptions"
-              [type]="'line'">
-            </canvas>
-          </div>
-        </div>
-      </div>
+    <!-- Dynamic table -->
+    <table *ngIf="stats?.rows; else loading" border="1" cellpadding="6">
+    <caption> Data from the last 30 days </caption>
+      <thead>
+        <tr>
+          <!-- Render dimension headers -->
+          <th *ngFor="let d of stats.dimensionHeaders">
+            {{ d.name }}
+          </th>
+          <!-- Render metric headers -->
+          <th *ngFor="let m of stats.metricHeaders">
+            {{ m.name }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of stats.rows">
+          <!-- Render dimension values -->
+          <td *ngFor="let d of row.dimensionValues; let i = index">
+            {{ stats.dimensionHeaders[i].name === 'date' ? formatDate(d.value) : d.value }}
+          </td>
+          <!-- Render metric values -->
+          <td *ngFor="let m of row.metricValues">
+            {{ formatNumber(m.value) }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
-      <div class="mx-auto col-lg-10 col-md-6">
-        <div class="card shadow-sm">
-          <div class="card-header">Traffic Sources</div>
-          <div class="card-body">
-            <canvas baseChart
-              [data]="pieChartData"
-              [type]="'pie'">
-            </canvas>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Table -->
-    <div class="card shadow-sm">
-      <div class="card-header">Top Landing Pages</div>
-      <div class="card-body">
-        <table *ngIf="stats?.rows; else loading" class="table table-striped table-bordered">
-          <thead class="table-light">
-            <tr>
-              <th *ngFor="let d of stats.dimensionHeaders">{{ d.name }}</th>
-              <th *ngFor="let m of stats.metricHeaders">{{ m.name }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let row of stats.rows">
-              <td *ngFor="let d of row.dimensionValues; let i = index">
-                {{ stats.dimensionHeaders[i].name === 'date' ? formatDate(d.value) : d.value }}
-              </td>
-              <td *ngFor="let m of row.metricValues">
-                {{ formatNumber(m.value) }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-  <ng-template #loading> Loading stats... </ng-template>
+   
+    <ng-template #loading> Loading stats... </ng-template>
   `,
 })
 
