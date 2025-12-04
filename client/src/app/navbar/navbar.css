@@ -1,0 +1,29 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #222;
+  padding: 12px 20px;
+  color: #fff;
+
+  .brand {
+    font-size: 20px;
+    text-decoration: none;
+    color: #fff;
+    font-weight: bold;
+  }
+
+  .menu {
+    display: flex;
+    gap: 20px;
+
+    a {
+      color: #fff;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  }
+}
