@@ -1,43 +1,46 @@
 <h1>My Google Analytics Stats</h1>
 <h2>Metrics by Landing Page</h2>
 
-<!-- Dynamic table -->
-<table *ngIf="stats?.rows; else loading" border="1" cellpadding="6">
-<caption> Data from the last 30 days </caption>
-  <thead>
-    <tr>
-      <!-- Render dimension headers -->
-      <th *ngFor="let d of stats.dimensionHeaders">
-        {{ d.name }}
-      </th>
-      <!-- Render metric headers -->
-      <th *ngFor="let m of stats.metricHeaders">
-        {{ m.name }}
-      </th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let row of stats.rows">
-      <!-- Render dimension values -->
-      <td *ngFor="let d of row.dimensionValues; let i = index">
-        {{ stats.dimensionHeaders[i].name === 'date' ? formatDate(d.value) : d.value }}
-      </td>
-      <!-- Render metric values -->
-      <td *ngFor="let m of row.metricValues">
-        {{ formatNumber(m.value) }}
-      </td>
-    </tr>
-  </tbody>
-</table>
-<!-- <ul>
-  <li><a routerLink="/login">Login Page</a></li>
-  <li><a routerLink="/account">Account Page</a></li>
-  <li>
-    <button (click)="checkMe()">Call /api/me</button>
-    <pre *ngIf="me">{{ me | json }}</pre>
-  </li>
-  <li><button (click)="logout()">Log Out</button></li>
-</ul> -->
+<div class="kpi-grid">
+  
+  <div class="kpi-card">
+    <div class="kpi-title">Impressions</div>
+    <div class="kpi-value">{{ topMetrics.impressions | number }}</div>
+    <div class="kpi-change positive">+2.39%</div>
+  </div>
 
+  <div class="kpi-card">
+    <div class="kpi-title">CTR</div>
+    <div class="kpi-value">{{ topMetrics.ctr }}%</div>
+    <div class="kpi-change positive">+1.34%</div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-title">Backlinks</div>
+    <div class="kpi-value">{{ topMetrics.backlinks | number }}</div>
+    <div class="kpi-change positive">+0.83%</div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-title">Sessions</div>
+    <div class="kpi-value">{{ topMetrics.sessions | number }}</div>
+    <div class="kpi-change positive">+3.12%</div>
+  </div>
+
+</div>
+
+<!-- CHARTS -->
+<h2>Sessions</h2>
+<canvas baseChart
+        [data]="lineChartData"
+        [options]="lineChartOptions"
+        chartType="line">
+</canvas>
+
+<h2>Traffic Breakdown</h2>
+<canvas baseChart
+        [data]="pieChartData"
+        chartType="pie">
+</canvas>
 
 <ng-template #loading> Loading stats... </ng-template>
