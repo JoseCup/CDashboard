@@ -44,17 +44,29 @@ export class AccountComponent implements OnInit {
 
   constructor(private http: HttpClient) { }
 
+  gscData: any = null;
+
   ngOnInit() {
+    // GSC call
+    this.http.get('/api/gsc').subscribe({
+      next: (data) => {
+        this.gscData = data;
+
+        // Extract KPI metrics
+        this.processGscMetrics(data);
+      },
+      error: (err) => console.error(err)
+    });
+
+    // GA4 call
     this.http.get<any>('/api/stats').subscribe({
       next: (data) => {
         this.stats = data;
-
         // Example: Compute total sessions
         const totalSessions = data.rows.reduce(
           (sum: number, r: any) => sum + Number(r.metricValues[0].value),
           0
         );
-
 
         // -----------------------------
         // 📊 Build Line Chart (Active Users over Time)
@@ -127,6 +139,27 @@ export class AccountComponent implements OnInit {
         this.stats = err.error || { error: 'Unauthorized' };
       },
     });
+
+
+  }
+  // Google Search Console Metrics Helper
+  processGscMetrics(data: any) {
+    if (!data.rows) return;
+
+    let impressions = 0;
+    let clicks = 0;
+    let ctrSum = 0;
+
+    data.rows.forEach((r: any) => {
+      impressions += r.impressions || 0;
+      clicks += r.clicks || 0;
+      ctrSum += r.ctr || 0;
+    });
+
+    const ctr = (clicks / impressions) * 100;
+
+    this.topMetrics.impressions = impressions;
+    this.topMetrics.ctr = Number(ctr.toFixed(2));
   }
 
   // --- Helpers from your newer file ---
