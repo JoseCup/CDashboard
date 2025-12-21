@@ -19,7 +19,8 @@
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "googleapis": "^167.0.0",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "puppeteer": "^24.34.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

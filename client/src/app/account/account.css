@@ -36,3 +36,18 @@
 .kpi-change.negative {
   color: #d9534f;
 }
+@media print {
+  nav,
+  button {
+    display: none !important;
+  }
+
+  canvas {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  body {
+    background: white;
+  }
+}

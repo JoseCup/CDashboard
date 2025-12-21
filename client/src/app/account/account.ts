@@ -203,4 +203,24 @@ export class AccountComponent implements OnInit {
     if (isNaN(current) || isNaN(previous)) return 'black';
     return current >= previous ? 'green' : 'red';
   }
+
+  downloadPdf() {
+  const token = localStorage.getItem('token');
+
+  fetch('/api/report/pdf', {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+  .then(res => res.blob())
+  .then(blob => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'SEO_Report.pdf';
+    a.click();
+    window.URL.revokeObjectURL(url);
+  });
+}
+
 }

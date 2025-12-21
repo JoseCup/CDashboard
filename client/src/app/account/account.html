@@ -46,5 +46,10 @@
 
 <h2>Traffic Breakdown</h2>
 <canvas baseChart [data]="pieChartData" chartType="pie"> </canvas>
+<button class="btn btn-outline-primary mb-3"
+        (click)="downloadPdf()">
+  Download PDF Report
+</button>
+
 
 <ng-template #loading> Loading stats... </ng-template>

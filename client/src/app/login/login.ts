@@ -30,9 +30,15 @@ export class LoginComponent {
   error = '';
   constructor(private auth: AuthService, private router: Router) {}
   submit() {
-    this.auth.login(this.email, this.password).subscribe({
-      next: () => this.router.navigate(['/account']),
-      error: (e) => (this.error = e?.error?.message ?? 'Login failed'),
-    });
+      this.auth.login(this.email, this.password).subscribe({
+    next: () => {
+      this.auth.loadUser().subscribe(() => {
+        this.router.navigate(['/account']);
+      });
+    },
+    error: (e: any) => {
+      this.error = e?.error?.message ?? 'Login failed';
+    }
+  });
   }
 }

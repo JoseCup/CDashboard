@@ -1,6 +1,9 @@
+
+// Routes
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const puppeteer = require('puppeteer');
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
@@ -40,6 +43,50 @@ function verifyToken(req, res, next) {
     return res.status(401).json({ message: "Invalid token" });
   }
 }
+
+// Endpoint to fetch puppeteer data
+app.get('/api/report/pdf', verifyToken, async (req, res) => {
+  try {
+    const token = req.cookies.token;           // reuse the validated cookie
+
+    const browser = await puppeteer.launch({ headless: 'new' });
+    const page = await browser.newPage();
+
+    // set the auth cookie for the app domain
+    await page.setCookie({
+      name: 'token',
+      value: token,
+      domain: 'localhost', // adjust if you use a different host
+      path: '/',
+      httpOnly: true,
+      sameSite: 'Lax',
+    });
+
+    await page.goto('http://localhost:4200', { waitUntil: 'networkidle0' });
+    await page.goto('http://localhost:4200/account', { waitUntil: 'networkidle0' });
+
+
+    const pdf = await page.pdf({
+      format: 'A4',
+      printBackground: true,
+      margin: { top: '20px', bottom: '20px', left: '20px', right: '20px' },
+    });
+
+    await browser.close();
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'attachment; filename="SEO_Report.pdf"',
+      'Content-Length': pdf.length
+    });
+
+    res.send(pdf);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to generate PDF' });
+  }
+});
+
 
 app.get("/api/health", (_, res) => res.json({ ok: true }));
 
