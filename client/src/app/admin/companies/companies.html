@@ -1,0 +1,22 @@
+ <h1>Companies</h1>
+
+<form (submit)="createCompany(); $event.preventDefault()">
+  <input
+    [(ngModel)]="newCompany"
+    [ngModelOptions]="{ standalone: true }"
+    placeholder="Company name"
+  />
+  <button type="submit">Add Company</button>
+</form>
+
+
+<table>
+    <tr>
+    <th>Name</th>
+    <th>Created</th>
+    </tr>
+    <tr *ngFor="let c of companies">
+    <td>{{ c.name }}</td>
+    <td>{{ c.created_at | date }}</td>
+    </tr>
+</table>

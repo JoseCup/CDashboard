@@ -6,15 +6,16 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-      "migrate": "node-pg-migrate",
-      "migrate:up": "node-pg-migrate up",
-      "dev": "nodemon index.js"
+    "migrate": "node-pg-migrate",
+    "migrate:up": "node-pg-migrate up",
+    "dev": "nodemon index.js"
   },
   "keywords": [],
   "author": "Create Dev Crew",
   "license": "ISC",
   "dependencies": {
     "@google-analytics/data": "^5.2.0",
+    "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -23,6 +24,7 @@
     "googleapis": "^167.0.0",
     "jsonwebtoken": "^9.0.2",
     "node-pg-migrate": "^8.0.4",
+    "pg": "^8.16.3",
     "puppeteer": "^24.34.0"
   },
   "devDependencies": {

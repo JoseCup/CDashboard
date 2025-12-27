@@ -1,5 +1,10 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
+import {
+  CanActivate,
+  ActivatedRouteSnapshot,
+  Router,
+  RouterStateSnapshot
+} from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
@@ -12,9 +17,23 @@ export class AuthGuard implements CanActivate {
     private router: Router
   ) {}
 
-  canActivate(): Observable<boolean> {
-    return this.http.get('/api/me', { withCredentials: true }).pipe(
-      map(() => true), // authenticated
+  canActivate(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ): Observable<boolean> {
+
+    return this.http.get<any>('/api/me', { withCredentials: true }).pipe(
+      map(user => {
+        // Block non-platform admins from /admin routes
+        if (state.url.startsWith('/admin') && user.role !== 'platform_admin') {
+          this.router.navigate(['/account']);
+          return false;
+        }
+
+        // Authenticated + authorized
+        return true;
+      }),
+
       catchError(() => {
         this.router.navigate(['/login']);
         return of(false);

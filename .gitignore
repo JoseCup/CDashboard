@@ -48,3 +48,5 @@ coverage/
 Thumbs.db
 # Google Analytics service account keys
 server/keys/*.json
+
+scripts/
