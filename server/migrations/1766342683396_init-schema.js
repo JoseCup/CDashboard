@@ -1,14 +1,19 @@
 /**
  * @type {import('node-pg-migrate').ColumnDefinitions | undefined}
  */
-export const shorthands = undefined;
+// Old ES Module syntax
+// export const shorthands = undefined;
+
+//CommonJS syntax
+exports.shorthands = undefined;
+
 
 /**
  * @param pgm {import('node-pg-migrate').MigrationBuilder}
  * @param run {() => void | undefined}
  * @returns {Promise<void> | void}
  */
-exports.up = pgm => {
+exports.up = (pgm) => {
   pgm.createTable('users', {
     id: 'id',
     email: { type: 'varchar(255)', notNull: true, unique: true },
@@ -51,19 +56,14 @@ exports.up = pgm => {
     created_at: { type: 'timestamp', default: pgm.func('now()') }
   });
 
-  pgm.addConstraint(
-    'company_users',
-    'unique_company_user',
-    {
-      unique: ['company_id', 'user_id']
-    }
-  );
+  pgm.addConstraint('company_users', 'unique_company_user', {
+    unique: ['company_id', 'user_id']
+  });
 };
 
-exports.down = pgm => {
+exports.down = (pgm) => {
   pgm.dropTable('company_users');
   pgm.dropType('company_role');
   pgm.dropTable('companies');
   pgm.dropTable('users');
 };
-
