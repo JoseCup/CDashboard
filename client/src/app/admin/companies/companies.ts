@@ -21,11 +21,13 @@ export class CompaniesComponent implements OnInit {
     this.loadCompanies();
   }
 
+  // Load companies from server
   loadCompanies() {
     this.http.get<any[]>('/api/admin/companies')
       .subscribe(data => this.companies = data);
   }
 
+  // Create new company
   createCompany() {
     if (!this.newCompany.trim()) return;
 
@@ -36,4 +38,49 @@ export class CompaniesComponent implements OnInit {
         this.loadCompanies();
       });
   }
+
+  // Assign admin to company
+  addAdmin(company: any) {
+    if (!company.adminEmail) return;
+
+    this.http.post(
+      `/api/admin/companies/${company.id}/users`,
+      {
+        email: company.adminEmail,
+        role: 'company_admin'
+      },
+      { withCredentials: true }
+    ).subscribe({
+      next: () => {
+        company.adminEmail = '';
+        alert('Company admin assigned');
+      },
+      error: () => alert('Failed to assign admin')
+    });
+  }
+
+  // Add member to company
+  addMember(company: any) {
+  if (!company.newMemberEmail) return;
+
+  this.http.post(
+    `/api/companies/${company.id}/members`,
+    {
+      email: company.newMemberEmail,
+      role: company.newMemberRole || 'user'
+    },
+    { withCredentials: true }
+  ).subscribe({
+    next: () => {
+      company.newMemberEmail = '';
+      alert('Member added');
+    },
+    error: err => {
+      alert(err?.error?.message || 'Failed to add member');
+    }
+  });
+}
+
+
+
 }

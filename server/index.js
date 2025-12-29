@@ -25,6 +25,34 @@ app.get('/api/admin/companies', verifyToken, requirePlatformAdmin, async (req, r
   res.json(result.rows);
 });
 
+// Get members of a company (platform admin only)
+app.get(
+  '/api/admin/companies/:companyId/users',
+  verifyToken,
+  requirePlatformAdmin,
+  async (req, res) => {
+    const { companyId } = req.params;
+
+    const result = await pool.query(
+      `
+      SELECT 
+        u.id,
+        u.email,
+        u.name,
+        cu.role
+      FROM company_users cu
+      JOIN users u ON u.id = cu.user_id
+      WHERE cu.company_id = $1
+      ORDER BY u.email
+      `,
+      [companyId]
+    );
+
+    res.json(result.rows);
+  }
+);
+
+
 // Create new company - platform admin only
 app.post('/api/admin/companies', verifyToken, requirePlatformAdmin, async (req, res) => {
   const { name } = req.body;
@@ -43,7 +71,190 @@ app.post('/api/admin/companies', verifyToken, requirePlatformAdmin, async (req, 
   res.status(201).json(result.rows[0]);
 });
 
+// Assign user to company with role - platform admin only
+app.post(
+  '/api/admin/companies/:companyId/users',
+  verifyToken,
+  requirePlatformAdmin,
+  async (req, res) => {
+    const { companyId } = req.params;
+    const { email, name, role } = req.body;
 
+    if (!email || !role) {
+      return res.status(400).json({ message: 'Email and role required' });
+    }
+
+    const client = await pool.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      // 1. Find or create user
+      const userResult = await client.query(
+        'SELECT id FROM users WHERE email = $1',
+        [email]
+      );
+
+      let userId;
+
+      if (userResult.rowCount === 0) {
+        const tempPassword = 'ChangeMeNow!';
+        const hash = await bcrypt.hash(tempPassword, 12);
+
+        const insertUser = await client.query(
+          `INSERT INTO users (email, password_hash, name)
+           VALUES ($1, $2, $3)
+           RETURNING id`,
+          [email, hash, name]
+        );
+
+        userId = insertUser.rows[0].id;
+      } else {
+        userId = userResult.rows[0].id;
+      }
+
+      // 2. Assign role
+      await client.query(
+        `INSERT INTO company_users (company_id, user_id, role)
+         VALUES ($1, $2, $3)
+         ON CONFLICT (company_id, user_id)
+         DO UPDATE SET role = EXCLUDED.role`,
+        [companyId, userId, role]
+      );
+
+      await client.query('COMMIT');
+
+      res.json({ success: true });
+    } catch (err) {
+      await client.query('ROLLBACK');
+      console.error(err);
+      res.status(500).json({ message: 'Failed to assign user' });
+    } finally {
+      client.release();
+    }
+  }
+);
+
+// Add member to company - platform or company admin
+// Platform admins bypass company restriction
+// Company admins are scoped automatically
+// No duplicate routes needed
+/**
+ * Add member to a company
+ * - Platform admins: can add to ANY company
+ * - Company admins: can only add to THEIR company
+ */
+app.post(
+  '/api/companies/:companyId/members',
+  verifyToken,
+  async (req, res) => {
+    const { companyId } = req.params;
+    const { email, role } = req.body;
+    const requester = req.user;
+
+    console.log('➡️ Add member request', {
+      requester,
+      companyId,
+      email,
+      role
+    });
+
+    // 1. Validate input
+    if (!email || !role) {
+      return res.status(400).json({ message: 'Email and role required' });
+    }
+
+    // 2. Platform admin bypass
+    if (requester.isPlatformAdmin === true) {
+      console.log('✅ Platform admin detected — bypassing company checks');
+      return assignUserToCompany(companyId, email, role, res);
+    }
+
+    // 3. Company admin check
+    const access = await pool.query(
+      `
+      SELECT role
+      FROM company_users
+      WHERE user_id = $1 AND company_id = $2
+      `,
+      [requester.userId, companyId]
+    );
+
+    const isCompanyAdmin = access.rows.some(
+      r => r.role === 'company_admin'
+    );
+
+    if (!isCompanyAdmin) {
+      console.warn('⛔ Not authorized to add member', {
+        requester: requester.userId,
+        companyId
+      });
+      return res.status(403).json({ message: 'Not authorized' });
+    }
+
+    // 4. Authorized — proceed
+    return assignUserToCompany(companyId, email, role, res);
+  }
+);
+
+async function assignUserToCompany(companyId, email, role, res) {
+  try {
+    console.log('➡️ Assigning user', { companyId, email, role });
+
+    // Find user
+    const userResult = await pool.query(
+      'SELECT id FROM users WHERE email = $1',
+      [email]
+    );
+
+    if (userResult.rowCount === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const userId = userResult.rows[0].id;
+
+    // Insert or update role
+    await pool.query(
+      `
+      INSERT INTO company_users (company_id, user_id, role)
+      VALUES ($1, $2, $3)
+      ON CONFLICT (company_id, user_id)
+      DO UPDATE SET role = EXCLUDED.role
+      `,
+      [companyId, userId, role]
+    );
+
+    console.log('✅ Member added successfully');
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error('❌ Failed to assign member', err);
+    res.status(500).json({ message: 'Failed to assign member' });
+  }
+}
+
+
+app.delete(
+  '/api/companies/:companyId/members/:userId',
+  verifyToken,
+  async (req, res) => {
+    const { companyId, userId } = req.params;
+
+    await pool.query(
+      `
+      DELETE FROM company_users
+      WHERE company_id = $1 AND user_id = $2
+      `,
+      [companyId, userId]
+    );
+
+    res.json({ success: true });
+  }
+);
+
+
+// User login with JWT auth and role loading
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -84,6 +295,8 @@ app.post('/api/login', async (req, res) => {
       return res.status(403).json({ message: 'No company assigned' });
     }
 
+    const isPlatformAdmin = roleResult.rows.some(r => r.role === 'platform_admin');
+
     const { company_id, role } = roleResult.rows[0];
 
     // 4. Create JWT
@@ -91,7 +304,8 @@ app.post('/api/login', async (req, res) => {
       {
         userId: user.id,
         companyId: company_id,
-        role
+        role,
+        isPlatformAdmin
       },
       process.env.JWT_SECRET,
       { expiresIn: '15m' }
@@ -117,7 +331,7 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-
+// Get current user info
 app.get('/api/me', verifyToken, (req, res) => {
   res.json(req.user);
 });
@@ -271,7 +485,6 @@ app.post("/api/logout", (req, res) => {
   res.json({ message: "logged out" });
 });
 
-app.get("/api/me", verifyToken, (req, res) => res.json(req.user));
 
 app.get("/api/dashboard", verifyToken, (req, res) => {
   res.json({ websiteVisits: 1234, leads: 42, conversionRate: "3.4%" });

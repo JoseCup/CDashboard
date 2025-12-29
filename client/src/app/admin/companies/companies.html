@@ -11,12 +11,36 @@
 
 
 <table>
-    <tr>
-    <th>Name</th>
-    <th>Created</th>
-    </tr>
     <tr *ngFor="let c of companies">
     <td>{{ c.name }}</td>
     <td>{{ c.created_at | date }}</td>
+    <td>
+        <input
+        [(ngModel)]="c.adminEmail"
+        placeholder="admin@email.com"
+        [ngModelOptions]="{ standalone: true }"
+        />
+        <button (click)="addAdmin(c)">Add Admin</button>
+    </td>
     </tr>
 </table>
+
+<div *ngFor="let c of companies" class="company-card">
+  <h3>{{ c.name }}</h3>
+
+  <input
+    [(ngModel)]="c.newMemberEmail"
+    placeholder="user@email.com"
+    [ngModelOptions]="{ standalone: true }"
+  />
+
+  <select
+    [(ngModel)]="c.newMemberRole"
+    [ngModelOptions]="{ standalone: true }"
+  >
+    <option value="user">User</option>
+    <option value="company_admin">Company Admin</option>
+  </select>
+
+  <button (click)="addMember(c)">Add Member</button>
+</div>
