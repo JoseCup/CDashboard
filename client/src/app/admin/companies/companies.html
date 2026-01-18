@@ -1,46 +1,52 @@
- <h1>Companies</h1>
+<div class="container mt-4">
+  <h2>Companies</h2>
 
-<form (submit)="createCompany(); $event.preventDefault()">
-  <input
-    [(ngModel)]="newCompany"
-    [ngModelOptions]="{ standalone: true }"
-    placeholder="Company name"
-  />
-  <button type="submit">Add Company</button>
-</form>
+  <!-- Create Company -->
+  <div class="input-group mb-3">
+    <input [(ngModel)]="newCompany" class="form-control" placeholder="New company name" />
+    <button class="btn btn-primary" (click)="createCompany()">Add Company</button>
+  </div>
 
+  <!-- Company List -->
+  <table class="table table-striped align-middle">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Website</th>
+        <th>Email</th>
+        <th class="text-end">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let company of companies">
+        <td>{{ company.name }}</td>
+        <td>{{ company.website || '—' }}</td>
+        <td>{{ company.email || '—' }}</td>
+        <td class="text-end">
+          <button class="btn btn-outline-primary btn-sm me-2" (click)="editCompany(company)">Edit</button>
+          <button class="btn btn-outline-danger btn-sm" (click)="deleteCompany(company.id)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 
-<table>
-    <tr *ngFor="let c of companies">
-    <td>{{ c.name }}</td>
-    <td>{{ c.created_at | date }}</td>
-    <td>
-        <input
-        [(ngModel)]="c.adminEmail"
-        placeholder="admin@email.com"
-        [ngModelOptions]="{ standalone: true }"
-        />
-        <button (click)="addAdmin(c)">Add Admin</button>
-    </td>
-    </tr>
-</table>
-
-<div *ngFor="let c of companies" class="company-card">
-  <h3>{{ c.name }}</h3>
-
-  <input
-    [(ngModel)]="c.newMemberEmail"
-    placeholder="user@email.com"
-    [ngModelOptions]="{ standalone: true }"
-  />
-
-  <select
-    [(ngModel)]="c.newMemberRole"
-    [ngModelOptions]="{ standalone: true }"
-  >
-    <option value="user">User</option>
-    <option value="company_admin">Company Admin</option>
-  </select>
-
-  <button (click)="addMember(c)">Add Member</button>
+  <!-- Edit Modal -->
+  <div *ngIf="editingCompany" class="modal-backdrop fade show"></div>
+  <div *ngIf="editingCompany" class="modal fade show d-block" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Company</h5>
+          <button type="button" class="btn-close" (click)="editingCompany = null"></button>
+        </div>
+        <div class="modal-body">
+          <input [(ngModel)]="editedName" class="form-control" placeholder="Company name" />
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="editingCompany = null">Cancel</button>
+          <button class="btn btn-primary" (click)="saveEdit()">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

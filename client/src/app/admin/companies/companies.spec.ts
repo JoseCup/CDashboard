@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { AuthService } from '../../auth.service'; 
 import { Companies } from './companies';
 
 describe('Companies', () => {

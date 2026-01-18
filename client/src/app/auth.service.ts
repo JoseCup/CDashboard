@@ -36,6 +36,13 @@ export class AuthService {
       })
     );
   }
+logout() {
+  return this.http.post('/api/logout', {}, { withCredentials: true }).pipe(
+    tap(() => {
+      this.clearUser(); // remove user from BehaviorSubject
+    })
+  );
+}
 
   get user() {
     return this.userSubject.value;
