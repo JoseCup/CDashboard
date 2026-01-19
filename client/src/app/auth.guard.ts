@@ -22,7 +22,7 @@ export class AuthGuard implements CanActivate {
     state: RouterStateSnapshot
   ): Observable<boolean> {
 
-    return this.http.get<any>('/api/me', { withCredentials: true }).pipe(
+    return this.http.get<any>('/api/auth/me', { withCredentials: true }).pipe(
       map(user => {
         // Block non-platform admins from /admin routes
         if (state.url.startsWith('/admin') && user.role !== 'platform_admin') {

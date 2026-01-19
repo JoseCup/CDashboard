@@ -1,24 +1,14 @@
 // Routes
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const puppeteer = require('puppeteer');
-const cookieParser = require("cookie-parser");
+const express = require('express');
+const router = express.Router();
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
-const bcrypt = require('bcrypt');
-const pool = require('./db');
-const app = express();
-app.use(express.json());
-app.use(cookieParser());
-app.use(cors({ origin: "http://localhost:4200", credentials: true }));
-// Backend company dashboard API
-const requirePlatformAdmin = require('./middleware/requirePlatformAdmin');
-
+const pool = require('../db');    
+const verifyToken = require('../middleware/verifyToken');
 //FIXME
 // Add member to company - platform or company admin
-app.post(
-  '/api/companies/:companyId/members',
+router.post(
+  '/companies/:companyId/members',
   verifyToken,
   async (req, res) => {
     const { companyId } = req.params;
@@ -107,15 +97,10 @@ async function assignUserToCompany(companyId, email, role, res) {
   }
 }
 
-// Get current user info
-app.get('/api/me', verifyToken, (req, res) => {
-  res.json(req.user);
-});
 
-app.get("/api/dashboard", verifyToken, (req, res) => {
+router.get("/dashboard", verifyToken, (req, res) => {
   res.json({ websiteVisits: 1234, leads: 42, conversionRate: "3.4%" });
 });
 
-app.listen(process.env.PORT || 5000, () =>
-  console.log(`API on http://localhost:${process.env.PORT || 5000}`)
-);
+
+module.exports = router;

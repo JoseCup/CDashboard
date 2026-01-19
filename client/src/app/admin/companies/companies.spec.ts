@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AuthService } from '../../auth.service'; 
-import { Companies } from './companies';
-
-describe('Companies', () => {
-  let component: Companies;
-  let fixture: ComponentFixture<Companies>;
+import { CompaniesComponent } from './companies';
+describe('CompaniesComponent', () => {
+  let component: CompaniesComponent;
+  let fixture: ComponentFixture<CompaniesComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Companies]
+      imports: [CompaniesComponent],
+      providers: [AuthService],   
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(Companies);
+    fixture = TestBed.createComponent(CompaniesComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

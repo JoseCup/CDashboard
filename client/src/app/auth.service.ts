@@ -1,55 +1,42 @@
 // src/app/auth.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { BehaviorSubject, tap } from 'rxjs';
+import { Observable, of, BehaviorSubject, tap } from 'rxjs';
 
-export type Me = { id: number; email: string; role: string; name: string };
+export type Me = { id: number; email: string; role: string; name?: string };
 
+// auth.service.ts
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private userSubject = new BehaviorSubject<any | null>(null);
+  private userSubject = new BehaviorSubject<Me | null>(null);
   user$ = this.userSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
-  loadUser(): Observable<any> {
-    // If already loaded, reuse it
+  loadUser(): Observable<Me | null> {
     if (this.userSubject.value) {
       return of(this.userSubject.value);
     }
 
-    return this.http.get('/api/me', { withCredentials: true }).pipe(tap(user => this.userSubject.next(user))
-    );
+    return this.http
+      .get<Me>('/api/auth/me', { withCredentials: true })
+      .pipe(tap(user => this.userSubject.next(user)));
   }
-  
-  /** Login and set auth cookie */
-  login(email: string, password: string): Observable<any> {
-    return this.http.post(
-      '/api/login',
-      { email, password },
-      { withCredentials: true }
-    ).pipe(
-      tap(() => {
-        // clear cached user so loadUser refetches fresh data
-        this.userSubject.next(null);
-      })
-    );
+
+  login(email: string, password: string) {
+    return this.http
+      .post('/api/auth/login', { email, password }, { withCredentials: true })
+      .pipe(tap(() => this.userSubject.next(null)));
   }
-logout() {
-  return this.http.post('/api/logout', {}, { withCredentials: true }).pipe(
-    tap(() => {
-      this.clearUser(); // remove user from BehaviorSubject
-    })
-  );
-}
+
+  logout() {
+    return this.http
+      .post('/api/auth/logout', {}, { withCredentials: true })
+      .pipe(tap(() => this.clearUser()));
+  }
 
   get user() {
     return this.userSubject.value;
-  }
-
-  isLoggedIn(): boolean {
-    return !!this.userSubject.value;
   }
 
   clearUser() {

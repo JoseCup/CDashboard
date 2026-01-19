@@ -10,21 +10,20 @@ import { AuthService } from '../../auth.service'; // 👈 import your AuthServic
   imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './companies.html',
 })
+
 export class CompaniesComponent implements OnInit {
   companies: any[] = [];
   newCompany = '';
   isPlatformAdmin = false;
 
-  constructor(private http: HttpClient, private auth: AuthService) {} // 👈 inject AuthService
+  constructor(private http: HttpClient, private auth: AuthService) { } // 👈 inject AuthService
 
-ngOnInit() {
-  this.auth.user$.subscribe(user => {
-    this.isPlatformAdmin = user?.role === 'platform_admin';
-  });
-  this.loadCompanies();
-}
-
-
+  ngOnInit() {
+    this.auth.loadUser().subscribe(user => {
+      this.isPlatformAdmin = user?.role === 'platform_admin';
+      this.loadCompanies();
+    });
+  }
 
   // 🔹 Load companies
   loadCompanies() {
@@ -64,35 +63,35 @@ ngOnInit() {
   }
 
   editingCompany: any = null;
-editedName = '';
- 
+  editedName = '';
+
   editCompany(company: any) {
-  this.editingCompany = { ...company };
-  this.editedName = company.name;
-}
-saveEdit() {
-  const id = this.editingCompany.id;
-  this.http.put(`/api/admin/companies/${id}`, { name: this.editedName }, { withCredentials: true })
-    .subscribe({
-      next: () => {
-        this.editingCompany = null;
-        this.loadCompanies();
-      },
-      error: err => alert(err?.error?.message || 'Failed to update company')
-    });
-}
-
-deleteCompany(id: number) {
-  if (!this.isPlatformAdmin) {
-    alert('You are not authorized to delete companies.');
-    return;
+    this.editingCompany = { ...company };
+    this.editedName = company.name;
+  }
+  saveEdit() {
+    const id = this.editingCompany.id;
+    this.http.put(`/api/admin/companies/${id}`, { name: this.editedName }, { withCredentials: true })
+      .subscribe({
+        next: () => {
+          this.editingCompany = null;
+          this.loadCompanies();
+        },
+        error: err => alert(err?.error?.message || 'Failed to update company')
+      });
   }
 
-  if (confirm('Are you sure you want to delete this company?')) {
-    this.http.delete(`/api/admin/companies/${id}`, { withCredentials: true })
-      .subscribe(() => this.loadCompanies());
+  deleteCompany(id: number) {
+    if (!this.isPlatformAdmin) {
+      alert('You are not authorized to delete companies.');
+      return;
+    }
+
+    if (confirm('Are you sure you want to delete this company?')) {
+      this.http.delete(`/api/admin/companies/${id}`, { withCredentials: true })
+        .subscribe(() => this.loadCompanies());
+    }
   }
-}
 
   // 🔹 Add member to company
   addMember(company: any) {

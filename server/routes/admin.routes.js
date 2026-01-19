@@ -1,24 +1,11 @@
-
-// Routes
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const puppeteer = require('puppeteer');
-const cookieParser = require("cookie-parser");
-const jwt = require("jsonwebtoken");
-require("dotenv").config();
-const bcrypt = require('bcrypt');
-const pool = require('./db');
-const app = express();
-app.use(express.json());
-app.use(cookieParser());
-app.use(cors({ origin: "http://localhost:4200", credentials: true }));
-// Backend company dashboard API
-const requirePlatformAdmin = require('./middleware/requirePlatformAdmin');
-
+const express = require('express');
+const router = express.Router();
+const pool = require('../db');
+const verifyToken = require('../middleware/verifyToken');
+const requirePlatformAdmin = require('../middleware/requirePlatformAdmin');
 
 // GET all companies - platform admin only
-app.get('/api/admin/companies', verifyToken, requirePlatformAdmin, async (req, res) => {
+router.get('/companies', verifyToken, requirePlatformAdmin, async (req, res) => {
   const result = await pool.query(
     `SELECT id, name, created_at FROM companies ORDER BY created_at DESC`
   );
@@ -26,8 +13,8 @@ app.get('/api/admin/companies', verifyToken, requirePlatformAdmin, async (req, r
 });
 
 // Get members of a company (platform admin only)
-app.get(
-  '/api/admin/companies/:companyId/users',
+router.get(
+  '/companies/:companyId/users',
   verifyToken,
   requirePlatformAdmin,
   async (req, res) => {
@@ -54,7 +41,7 @@ app.get(
 
 
 // Create new company - platform admin only
-app.post('/api/admin/companies', verifyToken, requirePlatformAdmin, async (req, res) => {
+router.post('/companies', verifyToken, requirePlatformAdmin, async (req, res) => {
   const { name } = req.body;
 
   if (!name) {
@@ -72,8 +59,8 @@ app.post('/api/admin/companies', verifyToken, requirePlatformAdmin, async (req, 
 });
 
 // Assign user to company with role - platform admin only
-app.post(
-  '/api/admin/companies/:companyId/users',
+router.post(
+  '/companies/:companyId/users',
   verifyToken,
   requirePlatformAdmin,
   async (req, res) => {
@@ -136,8 +123,8 @@ app.post(
 );
 
 // Add member to company - platform or company admin
-app.post(
-  '/api/companies/:companyId/members',
+router.post(
+  '/companies/:companyId/members',
   verifyToken,
   async (req, res) => {
     const { companyId } = req.params;
@@ -186,6 +173,79 @@ app.post(
   }
 );
 
+// Update company details - platform admin only
+router.put('/companies/:id', verifyToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'platform_admin') {
+      return res.status(403).json({ error: 'Forbidden: not authorized' });
+    }
+
+    const { name, website, contactEmail } = req.body;
+    const companyId = req.params.id;
+
+    const result = await pool.query(
+      `
+      UPDATE companies
+      SET
+        name = COALESCE($1, name),
+        website = COALESCE($2, website),
+        contact_email = COALESCE($3, contact_email)
+      WHERE id = $4
+      RETURNING *
+      `,
+      [
+        name ?? null,
+        website ?? null,
+        contactEmail ?? null,
+        companyId
+      ]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: 'Company not found' });
+    }
+
+    res.json({
+      message: 'Company updated successfully',
+      company: result.rows[0]
+    });
+
+  } catch (e) {
+    console.error('Update company error:', e);
+    res.status(500).json({ error: 'Failed to update company' });
+  }
+});
+
+
+// Delete company - platform admin only
+router.delete('/companies/:id', verifyToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'platform_admin') {
+      return res.status(403).json({ error: 'Forbidden: not authorized' });
+    }
+
+    const companyId = req.params.id;
+
+    const result = await pool.query(
+      'DELETE FROM companies WHERE id = $1 RETURNING id',
+      [companyId]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: 'Company not found' });
+    }
+
+    res.json({ message: 'Company deleted successfully' });
+
+  } catch (e) {
+    console.error('Delete company error:', e);
+    res.status(500).json({ error: 'Failed to delete company' });
+  }
+});
+
+
+
+
 async function assignUserToCompany(companyId, email, role, res) {
   try {
     console.log('➡️ Assigning user', { companyId, email, role });
@@ -223,58 +283,4 @@ async function assignUserToCompany(companyId, email, role, res) {
   }
 }
 
-// Update company details - platform admin only
-app.put('/api/companies/:id', verifyToken, async (req, res) => {
-  try {
-    // Only platform admins can update
-    if (req.user.role !== 'platform_admin') {
-      return res.status(403).json({ error: 'Forbidden: not authorized' });
-    }
-
-    const { name, website, contactEmail } = req.body;
-    const companyId = req.params.id;
-
-    db.run(
-      `UPDATE companies 
-       SET name = COALESCE(?, name),
-           website = COALESCE(?, website),
-           contactEmail = COALESCE(?, contactEmail)
-       WHERE id = ?`,
-      [name || null, website || null, contactEmail || null, companyId],
-      function (err) {
-        if (err) return res.status(500).json({ error: err.message });
-        if (this.changes === 0) return res.status(404).json({ message: 'Company not found' });
-        res.json({ message: 'Company updated successfully' });
-      }
-    );
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: 'Failed to update company' });
-  }
-});
-
-// Delete company - platform admin only
-app.delete('/api/companies/:id', verifyToken, async (req, res) => {
-  try {
-    if (req.user.role !== 'platform_admin') {
-      return res.status(403).json({ error: 'Forbidden: not authorized' });
-    }
-
-    const companyId = req.params.id;
-    db.run(`DELETE FROM companies WHERE id = ?`, [companyId], function (err) {
-      if (err) return res.status(500).json({ error: err.message });
-      if (this.changes === 0) return res.status(404).json({ message: 'Company not found' });
-      res.json({ message: 'Company deleted successfully' });
-    });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: 'Failed to delete company' });
-  }
-});
-
-
-
-
-app.listen(process.env.PORT || 5000, () =>
-  console.log(`API on http://localhost:${process.env.PORT || 5000}`)
-);
+module.exports = router;

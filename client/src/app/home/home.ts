@@ -15,13 +15,13 @@ export class HomeComponent {
   constructor(private http: HttpClient) {}
 
   checkMe() {
-    this.http.get('/api/me', { withCredentials: true }).subscribe({
+    this.http.get('/api/auth/me', { withCredentials: true }).subscribe({
       next: (data) => (this.me = data),
       error: (err) => (this.me = err.error || { error: 'Unauthorized' }),
     });
   }
   logout() {
-    this.http.post('/api/logout', {}, { withCredentials: true }).subscribe(() => {
+    this.http.post('/api/auth/logout', {}, { withCredentials: true }).subscribe(() => {
       this.me = null;
     });
   }

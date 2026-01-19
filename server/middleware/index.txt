@@ -1,16 +1,6 @@
 
-// Routes
-const express = require('express');
-const router = express.Router();
-const puppeteer = require('puppeteer');
-const jwt = require("jsonwebtoken");
-const verifyToken = require('../middleware/verifyToken');
-require("dotenv").config();
-// Backend company dashboard API
-
-
 // Endpoint to fetch puppeteer data
-router.get('/report/pdf', verifyToken, async (req, res) => {
+app.get('/api/report/pdf', verifyToken, async (req, res) => {
   try {
     const token = req.cookies.token;           // reuse the validated cookie
 
@@ -51,21 +41,8 @@ router.get('/report/pdf', verifyToken, async (req, res) => {
     res.status(500).json({ error: 'Failed to generate PDF' });
   }
 });
-
-
-router.get("/health", (_, res) => res.json({ ok: true }));
-
-
-// ga4 analytics
-const { BetaAnalyticsDataClient } = require("@google-analytics/data");
-const path = require("path");
-
-const analyticsClient = new BetaAnalyticsDataClient({
-  keyFilename: path.join(__dirname, "keys/analytics-key.json"),
-});
-
 // Example endpoint: get pageviews in last 30 days
-router.get("/stats", verifyToken, async (req, res) => {
+app.get("/api/stats", verifyToken, async (req, res) => {
   try {
     const [response] = await analyticsClient.runReport({
       property: `properties/${process.env.GA4_PROPERTY_ID}`,
@@ -93,7 +70,6 @@ router.get("/stats", verifyToken, async (req, res) => {
     res.status(500).json({ error: "Failed to fetch GA stats" });
   }
 });
-
 // Google Search Console GSC backend route
 const { google } = require("googleapis");
 
@@ -106,7 +82,7 @@ async function getSearchConsoleClient() {
 }
 
 // api endpoint to get GSC data
-router.get("/gsc", verifyToken, async (req, res) => {
+app.get("/api/gsc", verifyToken, async (req, res) => {
   try {
     const webmasters = await getSearchConsoleClient();
 
@@ -135,4 +111,6 @@ function daysAgo(num) {
   return d.toISOString().split("T")[0]; // YYYY-MM-DD
 }
 
-module.exports = router;
+app.get("/api/dashboard", verifyToken, (req, res) => {
+  res.json({ websiteVisits: 1234, leads: 42, conversionRate: "3.4%" });
+});
