@@ -207,7 +207,7 @@ export class AccountComponent implements OnInit {
   downloadPdf() {
   const token = localStorage.getItem('token');
 
-  fetch('/api/report/pdf', {
+  fetch('/api/reports/pdf', {
     headers: {
       Authorization: `Bearer ${token}`
     }
