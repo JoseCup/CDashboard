@@ -2,7 +2,6 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-require("dotenv").config();
 const pool = require('../db');    
 const verifyToken = require('../middleware/verifyToken');
 //FIXME

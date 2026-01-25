@@ -205,22 +205,18 @@ export class AccountComponent implements OnInit {
   }
 
   downloadPdf() {
-  const token = localStorage.getItem('token');
+    this.http.get('/api/reports/pdf', {
+      responseType: 'blob'
+    }).subscribe(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'SEO_Report.pdf';
+      a.click();
+      window.URL.revokeObjectURL(url);
+    });
+  }
 
-  fetch('/api/reports/pdf', {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  })
-  .then(res => res.blob())
-  .then(blob => {
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'SEO_Report.pdf';
-    a.click();
-    window.URL.revokeObjectURL(url);
-  });
-}
+
 
 }
