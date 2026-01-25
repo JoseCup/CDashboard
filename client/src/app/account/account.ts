@@ -48,7 +48,7 @@ export class AccountComponent implements OnInit {
 
   ngOnInit() {
     // GSC call
-    this.http.get('/api/gsc').subscribe({
+    this.http.get('/api/stats/gsc').subscribe({
       next: (data) => {
         this.gscData = data;
 
@@ -59,7 +59,7 @@ export class AccountComponent implements OnInit {
     });
 
     // GA4 call
-    this.http.get<any>('/api/stats').subscribe({
+    this.http.get<any>('/api/stats/ga4').subscribe({
       next: (data) => {
         this.stats = data;
         // Example: Compute total sessions
