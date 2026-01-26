@@ -1,3 +1,5 @@
+const jwt = require('jsonwebtoken');
+
 module.exports = function verifyToken(req, res, next) {
   const authHeader = req.headers.authorization;
   const tokenFromHeader = authHeader?.startsWith('Bearer ')

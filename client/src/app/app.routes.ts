@@ -22,8 +22,9 @@ export const routes: Routes = [
         .then(m => m.LoginComponent)
   },
   {
-    path: '',
-    redirectTo: '/account',
-    pathMatch: 'full'
+    path: 'home',
+    loadComponent: () =>
+      import('./home/home')
+        .then(m => m.HomeComponent)
   }
 ];

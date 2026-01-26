@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const pool = require('../db');    
+
 const verifyToken = require('../middleware/verifyToken');
 //FIXME
 // Add member to company - platform or company admin
