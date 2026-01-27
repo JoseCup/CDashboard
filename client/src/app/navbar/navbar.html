@@ -2,11 +2,24 @@
   <a routerLink="/" class="brand">My Dashboard</a>
 
   <ul class="menu">
-    <li><a routerLink="/home">Home</a></li>
-    <li><a routerLink="/account">Account</a></li>
-    <li><a routerLink="/settings">Settings</a></li>
-    <li><a routerLink="/admin/companies">Admin</a></li>
-    <li><a routerLink="/login" class="nav-link text-danger" (click)="logout()">Logout</a></li>
+    <li><a routerLink="/">Home</a></li>
 
+    <ng-container *ngIf="isLoggedIn$ | async; else loggedOut">
+      <li><a routerLink="/account">Account</a></li>
+
+      <li *ngIf="(user$ | async)?.role === 'platform_admin'">
+        <a routerLink="/admin/companies">Admin</a>
+      </li>
+
+      <li>
+        <button class="nav-link text-danger" (click)="logout()">
+          Logout
+        </button>
+      </li>
+    </ng-container>
+
+    <ng-template #loggedOut>
+      <li><a routerLink="/login">Login</a></li>
+    </ng-template>
   </ul>
 </nav>

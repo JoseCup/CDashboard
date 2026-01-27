@@ -25,13 +25,13 @@ export class CompaniesComponent implements OnInit {
     });
   }
 
-  // 🔹 Load companies
+  //  Load companies
   loadCompanies() {
     this.http.get<any[]>('/api/admin/companies', { withCredentials: true })
       .subscribe(data => this.companies = data);
   }
 
-  // 🔹 Create new company
+  //  Create new company
   createCompany() {
     if (!this.newCompany.trim()) return;
 
@@ -42,7 +42,7 @@ export class CompaniesComponent implements OnInit {
       });
   }
 
-  // 🔹 Assign admin to company
+  // Assign admin to company
   addAdmin(company: any) {
     if (!company.adminEmail) return;
 

@@ -1,7 +1,9 @@
 // src/app/auth.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, BehaviorSubject, tap } from 'rxjs';
+import { Observable, of, BehaviorSubject, tap, } from 'rxjs';
+import { map } from 'rxjs/operators';
+
 
 export type Me = { id: number; email: string; role: string; name?: string };
 
@@ -10,6 +12,10 @@ export type Me = { id: number; email: string; role: string; name?: string };
 export class AuthService {
   private userSubject = new BehaviorSubject<Me | null>(null);
   user$ = this.userSubject.asObservable();
+
+  isLoggedIn$ = this.user$.pipe(
+    map(user => !!user)
+  );
 
   constructor(private http: HttpClient) {}
 
@@ -26,7 +32,9 @@ export class AuthService {
   login(email: string, password: string) {
     return this.http
       .post('/api/auth/login', { email, password }, { withCredentials: true })
-      .pipe(tap(() => this.userSubject.next(null)));
+      .pipe(
+        tap(() => this.userSubject.next(null)) // triggers reload via guard/app init
+      );
   }
 
   logout() {
