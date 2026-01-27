@@ -30,13 +30,31 @@ export const routes: Routes = [
       import('./account/account').then(m => m.AccountComponent)
   },
 
-  {
-    path: 'admin/companies',
-    canActivate: [AuthGuard],
-    loadComponent: () =>
-      import('./admin/companies/companies')
-        .then(m => m.CompaniesComponent)
-  },
+  // {
+  //   path: 'admin/companies',
+  //   canActivate: [AuthGuard],
+  //   loadComponent: () =>
+  //     import('./admin/companies/companies')
+  //       .then(m => m.CompaniesComponent)
+  // },
+{
+  path: 'admin/companies',
+  loadComponent: () =>
+    import('./admin/companies/companies-list/companies-list')
+      .then(m => m.CompaniesListComponent)
+},
+{
+  path: 'admin/companies/:companyId',
+  loadComponent: () =>
+    import('./admin/companies/company-detail/company-detail')
+      .then(m => m.CompanyDetailComponent)
+},
+{
+  path: 'admin/companies/:companyId/users',
+  loadComponent: () =>
+    import('./admin/companies/company-users/company-users')
+      .then(m => m.CompanyUsersComponent)
+},
 
   // optional: safety net
   {

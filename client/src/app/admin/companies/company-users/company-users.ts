@@ -3,17 +3,17 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../auth.service'; // 👈 import your AuthService
+import { AuthService } from '../../../auth.service'; 
+
 
 @Component({
+  selector: 'app-company-users',
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule],
-  templateUrl: './companies.html',
+  templateUrl: './company-users.html',
+  styleUrl: './company-users.css',
 })
-
-
-
-export class CompaniesComponent implements OnInit {
+export class CompanyUsersComponent implements OnInit {
   companies: any[] = [];
   newCompany = '';
   isPlatformAdmin = false;
