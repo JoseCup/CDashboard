@@ -39,6 +39,41 @@ router.get(
   }
 );
 
+// GET single company - platform admin only
+router.get(
+  '/companies/:companyId',
+  verifyToken,
+  requirePlatformAdmin,
+  async (req, res) => {
+    const { companyId } = req.params;
+
+    try {
+      const result = await pool.query(
+        `
+        SELECT
+          id,
+          name,
+          website,
+          contact_email AS "contactEmail",
+          created_at
+        FROM companies
+        WHERE id = $1
+        `,
+        [companyId]
+      );
+
+      if (result.rowCount === 0) {
+        return res.status(404).json({ message: 'Company not found' });
+      }
+
+      res.json(result.rows[0]);
+    } catch (err) {
+      console.error('Get company error:', err);
+      res.status(500).json({ message: 'Failed to load company' });
+    }
+  }
+);
+
 
 // Create new company - platform admin only
 router.post('/companies', verifyToken, requirePlatformAdmin, async (req, res) => {

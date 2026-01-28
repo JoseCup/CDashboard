@@ -1,1 +1,65 @@
-<p>company-detail works!</p>
+<div class="container mt-4" *ngIf="company">
+
+  <div class="d-flex justify-content-between align-items-center mb-3" >
+    <h2>{{ company.name }}</h2>
+
+    <a
+      routerLink="/admin/companies"
+      class="btn btn-outline-secondary btn-sm"
+    >
+      ← Back to Companies
+    </a>
+  </div>
+
+  <form (ngSubmit)="saveCompany()" #companyForm="ngForm" >
+
+    <div class="mb-3">
+      <label class="form-label">Company Name</label>
+      <input
+        type="text"
+        class="form-control"
+        name="name"
+        [(ngModel)]="company.name"
+        [disabled]="!isPlatformAdmin"
+        required
+      />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Website</label>
+      <input
+        type="url"
+        class="form-control"
+        name="website"
+        [(ngModel)]="company.website"
+        placeholder="https://example.com"
+        [disabled]="!isPlatformAdmin"
+      />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Contact Email</label>
+      <input
+        type="email"
+        class="form-control"
+        name="contactEmail"
+        [(ngModel)]="company.contactEmail"
+        [disabled]="!isPlatformAdmin"
+      />
+    </div>
+
+    <div class="mb-3 text-muted">
+      <small>Company ID: {{ company.id }}</small>
+    </div>
+
+    <button
+      *ngIf="isPlatformAdmin"
+      type="submit"
+      class="btn btn-primary"
+      [disabled]="!companyForm.form.valid"
+    >
+      Save Changes
+    </button>
+
+  </form>
+</div>

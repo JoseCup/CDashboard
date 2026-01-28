@@ -1,1 +1,45 @@
-<p>companies-list works!</p>
+<div class="col-10 mx-auto">
+    <h1>Companies</h1>
+<table class="table table-sm align-middle col-8">
+  <thead>
+    <tr>
+      <th>Company</th>
+      <th>Website</th>
+      <th class="text-end">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let company of companies">
+      <td>
+        <a
+          [routerLink]="['/admin/companies', company.id]"
+          class="fw-semibold text-decoration-none"
+        >
+          {{ company.name }}
+        </a>
+      </td>
+
+      <td class="text-muted">
+        {{ company.website || '—' }}
+      </td>
+
+      <td class="text-end">
+        <button
+          class="btn btn-outline-primary btn-sm me-2"
+          [routerLink]="['/admin/companies', company.id]"
+        >
+          Manage
+        </button>
+
+        <button
+          *ngIf="isPlatformAdmin"
+          class="btn btn-outline-danger btn-sm"
+          (click)="deleteCompany(company.id)"
+        >
+          Delete
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>

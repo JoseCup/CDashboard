@@ -15,7 +15,9 @@ import { AuthService } from '../../../auth.service';
 
 export class CompanyDetailComponent implements OnInit {
   companyId!: string;
-  company: any;
+company: any = null;
+
+
   isPlatformAdmin = false;
 
   constructor(
@@ -36,10 +38,15 @@ export class CompanyDetailComponent implements OnInit {
 
 
   //  Load company
-  loadCompany() {
-    this.http.get<any>(`/api/admin/companies/${this.companyId}`, { withCredentials: true })
-      .subscribe(data => this.company = data);
-  }
+loadCompany() {
+  this.http
+    .get<any>(`/api/admin/companies/${this.companyId}`, { withCredentials: true })
+    .subscribe(data => {
+      console.log('Company API response:', data);
+      this.company = data;
+    });
+}
+
 
   editingCompany: any = null;
   editedName = '';
@@ -49,18 +56,24 @@ export class CompanyDetailComponent implements OnInit {
     this.editedName = company.name;
   }
 
-  saveEdit() {
-    if (!this.isPlatformAdmin) return;
-    
-    const id = this.editingCompany.id;
-    this.http.put(`/api/admin/companies/${id}`, { name: this.editedName }, { withCredentials: true })
-      .subscribe({
-        next: () => {
-          this.editingCompany = null;
-          this.loadCompany();
-        },
-        error: err => alert(err?.error?.message || 'Failed to update company')
-      });
-  }
+saveCompany() {
+  if (!this.isPlatformAdmin) return;
+
+  this.http
+    .put(
+      `/api/admin/companies/${this.companyId}`,
+      {
+        name: this.company.name,
+        website: this.company.website,
+        contactEmail: this.company.contactEmail
+      },
+      { withCredentials: true }
+    )
+    .subscribe({
+      next: () => alert('Company updated'),
+      error: err => alert(err?.error?.message || 'Update failed')
+    });
+}
+
 
 }

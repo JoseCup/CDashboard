@@ -1,52 +1,43 @@
-<div class="container mt-4">
-  <h2>Companies</h2>
+<table class="table table-sm align-middle">
+  <thead>
+    <tr>
+      <th>Company</th>
+      <th>Website</th>
+      <th class="text-end">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let company of companies">
+      <td>
+        <a
+          [routerLink]="['/admin/companies', company.id]"
+          class="fw-semibold text-decoration-none"
+        >
+          {{ company.name }}
+        </a>
+      </td>
 
-  <!-- Create Company -->
-  <div class="input-group mb-3">
-    <input [(ngModel)]="newCompany" class="form-control" placeholder="New company name" />
-    <button class="btn btn-primary" (click)="createCompany()">Add Company</button>
-  </div>
+      <td class="text-muted">
+        {{ company.website || '—' }}
+      </td>
 
-  <!-- Company List -->
-  <table class="table table-striped align-middle">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Website</th>
-        <th>Email</th>
-        <th class="text-end">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let company of companies">
-        <td>{{ company.name }}</td>
-        <td>{{ company.website || '—' }}</td>
-        <td>{{ company.email || '—' }}</td>
-        <td class="text-end">
-          <button class="btn btn-outline-primary btn-sm me-2" (click)="editCompany(company)">Edit</button>
-          <button class="btn btn-outline-danger btn-sm" (click)="deleteCompany(company.id)">Delete</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+      <td class="text-end">
+        <button
+          class="btn btn-outline-primary btn-sm me-2"
+          [routerLink]="['/admin/companies', company.id]"
+        >
+          Manage
+        </button>
 
-  <!-- Edit Modal -->
-  <div *ngIf="editingCompany" class="modal-backdrop fade show"></div>
-  <div *ngIf="editingCompany" class="modal fade show d-block" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Edit Company</h5>
-          <button type="button" class="btn-close" (click)="editingCompany = null"></button>
-        </div>
-        <div class="modal-body">
-          <input [(ngModel)]="editedName" class="form-control" placeholder="Company name" />
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary" (click)="editingCompany = null">Cancel</button>
-          <button class="btn btn-primary" (click)="saveEdit()">Save</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+        <button
+          *ngIf="isPlatformAdmin"
+          class="btn btn-outline-danger btn-sm"
+          (click)="deleteCompany(company.id)"
+        >
+          Delete
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
