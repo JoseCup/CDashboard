@@ -15,7 +15,12 @@ import { AuthService } from '../../../auth.service';
 
 export class CompanyDetailComponent implements OnInit {
   companyId!: string;
-company: any = null;
+  company: any = null;
+  users: any[] = [];
+  showAddUser = false;
+
+  newUserEmail = '';
+  newUserRole = 'user';
 
 
   isPlatformAdmin = false;
@@ -38,14 +43,14 @@ company: any = null;
 
 
   //  Load company
-loadCompany() {
-  this.http
-    .get<any>(`/api/admin/companies/${this.companyId}`, { withCredentials: true })
-    .subscribe(data => {
-      console.log('Company API response:', data);
-      this.company = data;
-    });
-}
+  loadCompany() {
+    this.http
+      .get<any>(`/api/admin/companies/${this.companyId}`, { withCredentials: true })
+      .subscribe(data => {
+        console.log('Company API response:', data);
+        this.company = data;
+      });
+  }
 
 
   editingCompany: any = null;
@@ -56,24 +61,81 @@ loadCompany() {
     this.editedName = company.name;
   }
 
-saveCompany() {
-  if (!this.isPlatformAdmin) return;
+  saveCompany() {
+    if (!this.isPlatformAdmin) return;
+
+    this.http
+      .put(
+        `/api/admin/companies/${this.companyId}`,
+        {
+          name: this.company.name,
+          website: this.company.website,
+          contactEmail: this.company.contactEmail
+        },
+        { withCredentials: true }
+      )
+      .subscribe({
+        next: () => alert('Company updated'),
+        error: err => alert(err?.error?.message || 'Update failed')
+      });
+  }
+  loadUsers() {
+    this.http
+      .get<any[]>(
+        `/api/admin/companies/${this.companyId}/users`,
+        { withCredentials: true }
+      )
+      .subscribe(users => this.users = users);
+  }
+
+
+  addUser() {
+  if (!this.newUserEmail) return;
 
   this.http
-    .put(
-      `/api/admin/companies/${this.companyId}`,
+    .post(
+      `/api/admin/companies/${this.companyId}/members`,
       {
-        name: this.company.name,
-        website: this.company.website,
-        contactEmail: this.company.contactEmail
+        email: this.newUserEmail,
+        role: this.newUserRole
       },
       { withCredentials: true }
     )
     .subscribe({
-      next: () => alert('Company updated'),
-      error: err => alert(err?.error?.message || 'Update failed')
+      next: () => {
+        this.newUserEmail = '';
+        this.newUserRole = 'user';
+        this.showAddUser = false;
+        this.loadUsers();
+      },
+      error: err => {
+        alert(err?.error?.message || 'Failed to add user');
+      }
     });
 }
+
+  updateUserRole(user: any) {
+    this.http
+      .post(
+        `/api/admin/companies/${this.companyId}/users`,
+        {
+          email: user.email,
+          role: user.role
+        },
+        { withCredentials: true }
+      )
+      .subscribe();
+  }
+  removeUser(userId: number) {
+    if (!confirm('Remove this user from the company?')) return;
+
+    this.http
+      .delete(
+        `/api/admin/companies/${this.companyId}/users/${userId}`,
+        { withCredentials: true }
+      )
+      .subscribe(() => this.loadUsers());
+  }
 
 
 }

@@ -1,18 +1,13 @@
 <div class="container mt-4" *ngIf="company">
-
-  <div class="d-flex justify-content-between align-items-center mb-3" >
+  <div class="d-flex justify-content-between align-items-center mb-3">
     <h2>{{ company.name }}</h2>
 
-    <a
-      routerLink="/admin/companies"
-      class="btn btn-outline-secondary btn-sm"
-    >
+    <a routerLink="/admin/companies" class="btn btn-outline-secondary btn-sm">
       ← Back to Companies
     </a>
   </div>
 
-  <form (ngSubmit)="saveCompany()" #companyForm="ngForm" >
-
+  <form (ngSubmit)="saveCompany()" #companyForm="ngForm">
     <div class="mb-3">
       <label class="form-label">Company Name</label>
       <input
@@ -61,5 +56,79 @@
       Save Changes
     </button>
 
+
   </form>
+      <hr class="my-5" />
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4>Company Users</h4>
+
+      <button
+      type ="button"
+        class="btn btn-outline-primary btn-sm"
+        (click)="showAddUser = true"
+        *ngIf="isPlatformAdmin"
+      >
+        + Add User
+      </button>
+    </div>
+    <div class="card p-3 mb-3" *ngIf="showAddUser">
+      <h6>Add User</h6>
+
+      <input
+        type="email"
+        class="form-control mb-2"
+        placeholder="Email"
+        [(ngModel)]="newUserEmail"
+      />
+
+      <select class="form-select mb-2" [(ngModel)]="newUserRole">
+        <option value="user">User</option>
+        <option value="company_admin">Company Admin</option>
+      </select>
+
+      <div class="text-end">
+        <button class="btn btn-secondary btn-sm me-2" (click)="showAddUser = false">Cancel</button>
+        <button class="btn btn-primary btn-sm" (click)="addUser()">Add</button>
+      </div>
+    </div>
+
+    <table class="table table-sm align-middle" *ngIf="users.length">
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Name</th>
+          <th>Role</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of users">
+          <td>{{ user.email }}</td>
+          <td>{{ user.name || '—' }}</td>
+          <td>
+            <select
+              class="form-select form-select-sm"
+              [(ngModel)]="user.role"
+              (change)="updateUserRole(user)"
+              [disabled]="!isPlatformAdmin"
+            >
+              <option value="user">User</option>
+              <option value="company_admin">Company Admin</option>
+            </select>
+          </td>
+          <td class="text-end">
+            <button
+              class="btn btn-outline-danger btn-sm"
+              (click)="removeUser(user.id)"
+              *ngIf="isPlatformAdmin"
+            >
+              Remove
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p class="text-muted" *ngIf="!users.length">No users assigned to this company yet.</p>
 </div>

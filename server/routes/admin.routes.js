@@ -3,6 +3,7 @@ const router = express.Router();
 const pool = require('../db');
 const verifyToken = require('../middleware/verifyToken');
 const requirePlatformAdmin = require('../middleware/requirePlatformAdmin');
+const bcrypt = require('bcrypt');
 
 // GET all companies - platform admin only
 router.get('/companies', verifyToken, requirePlatformAdmin, async (req, res) => {
