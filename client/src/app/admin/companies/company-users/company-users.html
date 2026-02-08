@@ -82,7 +82,7 @@
       </td>
 
       <td class="text-end">
-        <ng-container *ngIf="userPendingRemoval !== user.id; else confirmDelete">
+        <ng-container *ngIf="!isSelf(user) && userPendingRemoval !== user.id; else confirmDelete">
           <button
             class="btn btn-outline-danger btn-sm"
             *ngIf="isPlatformAdmin || isCompanyAdmin"
@@ -93,16 +93,20 @@
         </ng-container>
 
         <ng-template #confirmDelete>
-          <span class="text-danger me-2">Remove user?</span>
-          <button
-            class="btn btn-danger btn-sm me-1"
-            (click)="removeUser(user.id); userPendingRemoval = null"
-          >
-            Yes
-          </button>
-          <button class="btn btn-secondary btn-sm" (click)="userPendingRemoval = null">
-            Cancel
-          </button>
+          <ng-container *ngIf="!isSelf(user)">
+            <span class="text-danger me-2">Remove user?</span>
+            <button
+              class="btn btn-danger btn-sm me-1"
+              (click)="removeUser(user.id); userPendingRemoval = null"
+            >
+              Yes
+            </button>
+            <button class="btn btn-secondary btn-sm" (click)="userPendingRemoval = null">
+              Cancel
+            </button>
+          </ng-container>
+
+          <span *ngIf="isSelf(user)" class="text-muted fst-italic"> You </span>
         </ng-template>
       </td>
     </tr>

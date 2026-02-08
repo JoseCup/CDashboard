@@ -23,19 +23,21 @@ export class CompaniesListComponent implements OnInit {
     private auth: AuthService
   ) {}
 
-  ngOnInit() {
-    this.auth.loadUser().subscribe(user => {
-      this.isPlatformAdmin = user?.role === 'platform_admin';
-    });
+ngOnInit() {
+  this.auth.loadUser().subscribe(user => {
+    this.isPlatformAdmin = user?.isPlatformAdmin === true;
 
-    this.loadCompanies();
-  }
+    if (this.isPlatformAdmin) {
+      this.loadCompanies();
+    }
+  });
+}
 
-  loadCompanies() {
-    this.http
-      .get<CompanyListItem[]>('/api/admin/companies', { withCredentials: true })
-      .subscribe(data => this.companies = data);
-  }
+loadCompanies() {
+  this.http
+    .get<CompanyListItem[]>('/api/admin/companies', { withCredentials: true })
+    .subscribe(data => this.companies = data);
+}
 
   createCompany() {
     if (!this.newCompany.trim()) return;

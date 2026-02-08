@@ -4,8 +4,14 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of, BehaviorSubject, tap, } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+export interface Me {
+  userId: number;
+  email: string;
+  companyId: number | null;
+  role: string | null;
+  isPlatformAdmin: boolean;
+}
 
-export type Me = { id: number; email: string; role: string; name?: string };
 
 // auth.service.ts
 @Injectable({ providedIn: 'root' })

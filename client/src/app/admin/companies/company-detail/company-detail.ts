@@ -37,7 +37,7 @@ export class CompanyDetailComponent implements OnInit {
     this.companyId = this.route.snapshot.paramMap.get('companyId')!;
 
     this.auth.loadUser().subscribe(user => {
-      this.isPlatformAdmin = user?.role === 'platform_admin';
+      this.isPlatformAdmin = user?.isPlatformAdmin === true;
       this.loadCompany();
     });
   }

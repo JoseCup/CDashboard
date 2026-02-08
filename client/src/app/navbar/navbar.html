@@ -7,7 +7,8 @@
     <ng-container *ngIf="isLoggedIn$ | async; else loggedOut">
       <li><a routerLink="/account">Account</a></li>
 
-      <li *ngIf="(user$ | async)?.role === 'platform_admin'">
+      <!-- PLATFORM ADMIN -->
+      <li *ngIf="(user$ | async)?.isPlatformAdmin">
         <a routerLink="/admin/companies">Admin</a>
       </li>
 

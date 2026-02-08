@@ -39,7 +39,7 @@ export class CompanyUsersComponent implements OnInit {
 
   ngOnInit() {
     this.auth.loadUser().subscribe(user => {
-      this.isPlatformAdmin = user?.role === 'platform_admin';
+      this.isPlatformAdmin = user?.isPlatformAdmin === true;
       if (this.companyId) {
         this.loadUsers();
       }
@@ -57,11 +57,16 @@ loadUsers() {
       this.users = users;
 
       const currentEmail = this.auth.user?.email;
-      this.isCompanyAdmin = users.some(
-        u => u.email === currentEmail && u.role === 'company_admin'
-      );
+
+      // Platform admins implicitly have company admin powers
+      this.isCompanyAdmin =
+        this.isPlatformAdmin ||
+        users.some(
+          u => u.email === currentEmail && u.role === 'company_admin'
+        );
     });
 }
+
 
 
 
@@ -130,5 +135,8 @@ confirmRemoveUser(user: any) {
   this.removeUser(user.id);
 }
 
+isSelf(user: any): boolean {
+  return user.email === this.auth.user?.email;
+}
 
 }
