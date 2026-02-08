@@ -94,17 +94,27 @@ router.post('/companies', verifyToken, requirePlatformAdmin, async (req, res) =>
   res.status(201).json(result.rows[0]);
 });
 
-// Assign user to company with role - platform admin only
+
+
+// Add user to company with role - platform admin only (with password)
 router.post(
   '/companies/:companyId/users',
   verifyToken,
   requirePlatformAdmin,
   async (req, res) => {
     const { companyId } = req.params;
-    const { email, name, role } = req.body;
+    const {
+      email,
+      firstName,
+      lastName,
+      password,
+      role
+    } = req.body;
 
-    if (!email || !role) {
-      return res.status(400).json({ message: 'Email and role required' });
+    if (!email || !password || !role) {
+      return res.status(400).json({
+        message: 'Email, password, and role are required'
+      });
     }
 
     const client = await pool.connect();
@@ -112,51 +122,62 @@ router.post(
     try {
       await client.query('BEGIN');
 
-      // 1. Find or create user
-      const userResult = await client.query(
+      // 1. Check if user exists
+      const existingUser = await client.query(
         'SELECT id FROM users WHERE email = $1',
         [email]
       );
 
       let userId;
 
-      if (userResult.rowCount === 0) {
-        const tempPassword = 'ChangeMeNow!';
-        const hash = await bcrypt.hash(tempPassword, 12);
+      if (existingUser.rowCount === 0) {
+        // 2. Create user
+        const passwordHash = await bcrypt.hash(password, 12);
 
         const insertUser = await client.query(
-          `INSERT INTO users (email, password_hash, name)
-           VALUES ($1, $2, $3)
-           RETURNING id`,
-          [email, hash, name]
+          `
+          INSERT INTO users (email, password_hash, first_name, last_name)
+          VALUES ($1, $2, $3, $4)
+          RETURNING id
+          `,
+          [
+            email.toLowerCase(),
+            passwordHash,
+            firstName || null,
+            lastName || null
+          ]
         );
 
         userId = insertUser.rows[0].id;
       } else {
-        userId = userResult.rows[0].id;
+        userId = existingUser.rows[0].id;
       }
 
-      // 2. Assign role
+      // 3. Assign to company
       await client.query(
-        `INSERT INTO company_users (company_id, user_id, role)
-         VALUES ($1, $2, $3)
-         ON CONFLICT (company_id, user_id)
-         DO UPDATE SET role = EXCLUDED.role`,
+        `
+        INSERT INTO company_users (company_id, user_id, role)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (company_id, user_id)
+        DO UPDATE SET role = EXCLUDED.role
+        `,
         [companyId, userId, role]
       );
 
       await client.query('COMMIT');
 
       res.json({ success: true });
+
     } catch (err) {
       await client.query('ROLLBACK');
-      console.error(err);
-      res.status(500).json({ message: 'Failed to assign user' });
+      console.error('Add user error:', err);
+      res.status(500).json({ message: 'Failed to add user' });
     } finally {
       client.release();
     }
   }
 );
+
 
 // Add member to company - platform or company admin
 router.post(

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
@@ -13,105 +13,80 @@ import { AuthService } from '../../../auth.service';
   templateUrl: './company-users.html',
   styleUrl: './company-users.css',
 })
+
 export class CompanyUsersComponent implements OnInit {
-  companies: any[] = [];
-  newCompany = '';
+
+  @Input() companyId!: number;
+
+  users: any[] = [];
+  showAddUser = false;
+  newUserEmail = '';
+  firstName = '';
+  lastName = '';
+  password = '';
+  newUserRole = 'user';
+
   isPlatformAdmin = false;
 
-  constructor(private http: HttpClient, private auth: AuthService) { } // 👈 inject AuthService
+  constructor(
+    private http: HttpClient,
+    private auth: AuthService
+  ) {}
 
   ngOnInit() {
     this.auth.loadUser().subscribe(user => {
       this.isPlatformAdmin = user?.role === 'platform_admin';
-      this.loadCompanies();
+      if (this.companyId) {
+        this.loadUsers();
+      }
     });
   }
 
-  //  Load companies
-  loadCompanies() {
-    this.http.get<any[]>('/api/admin/companies', { withCredentials: true })
-      .subscribe(data => this.companies = data);
+  loadUsers() {
+    this.http
+      .get<any[]>(
+        `/api/admin/companies/${this.companyId}/users`,
+        { withCredentials: true }
+      )
+      .subscribe(users => this.users = users);
   }
+  updateUserRole(user: any) {
+  this.http.post(
+    `/api/admin/companies/${this.companyId}/users`,
+    {
+      email: user.email,
+      role: user.role
+    },
+    { withCredentials: true }
+  ).subscribe(() => this.loadUsers());
+}
 
-  //  Create new company
-  createCompany() {
-    if (!this.newCompany.trim()) return;
 
-    this.http.post('/api/admin/companies', { name: this.newCompany }, { withCredentials: true })
-      .subscribe(() => {
-        this.newCompany = '';
-        this.loadCompanies();
-      });
-  }
-
-  // Assign admin to company
-  addAdmin(company: any) {
-    if (!company.adminEmail) return;
-
+  addUserAsPlatformAdmin() {
     this.http.post(
-      `/api/admin/companies/${company.id}/users`,
+      `/api/admin/companies/${this.companyId}/users`,
       {
-        email: company.adminEmail,
-        role: 'company_admin'
+        email: this.newUserEmail,
+        firstName: this.firstName,
+        lastName: this.lastName,
+        password: this.password,
+        role: this.newUserRole
       },
       { withCredentials: true }
-    ).subscribe({
-      next: () => {
-        company.adminEmail = '';
-        alert('Company admin assigned');
-      },
-      error: () => alert('Failed to assign admin')
+    ).subscribe(() => {
+      this.newUserEmail = '';
+      this.firstName = '';
+      this.lastName = '';
+      this.password = '';
+      this.newUserRole = 'user';
+      this.loadUsers();
     });
   }
 
-  editingCompany: any = null;
-  editedName = '';
-
-  editCompany(company: any) {
-    this.editingCompany = { ...company };
-    this.editedName = company.name;
-  }
-  saveEdit() {
-    const id = this.editingCompany.id;
-    this.http.put(`/api/admin/companies/${id}`, { name: this.editedName }, { withCredentials: true })
-      .subscribe({
-        next: () => {
-          this.editingCompany = null;
-          this.loadCompanies();
-        },
-        error: err => alert(err?.error?.message || 'Failed to update company')
-      });
-  }
-
-  deleteCompany(id: number) {
-    if (!this.isPlatformAdmin) {
-      alert('You are not authorized to delete companies.');
-      return;
-    }
-
-    if (confirm('Are you sure you want to delete this company?')) {
-      this.http.delete(`/api/admin/companies/${id}`, { withCredentials: true })
-        .subscribe(() => this.loadCompanies());
-    }
-  }
-
-  // 🔹 Add member to company
-  addMember(company: any) {
-    if (!company.newMemberEmail) return;
-
-    this.http.post(
-      `/api/companies/${company.id}/members`,
-      {
-        email: company.newMemberEmail,
-        role: company.newMemberRole || 'user'
-      },
+  removeUser(userId: number) {
+    this.http.delete(
+      `/api/admin/companies/${this.companyId}/users/${userId}`,
       { withCredentials: true }
-    ).subscribe({
-      next: () => {
-        company.newMemberEmail = '';
-        alert('Member added');
-      },
-      error: err => alert(err?.error?.message || 'Failed to add member')
-    });
+    ).subscribe(() => this.loadUsers());
   }
 }

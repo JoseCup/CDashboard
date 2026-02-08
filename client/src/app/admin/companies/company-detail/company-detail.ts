@@ -4,11 +4,12 @@ import { HttpClient } from '@angular/common/http';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../auth.service';
+import { CompanyUsersComponent } from '../company-users/company-users';
 
 @Component({
   selector: 'app-company-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, CompanyUsersComponent],
   templateUrl: './company-detail.html',
   styleUrl: './company-detail.css',
 })

@@ -11,8 +11,6 @@ import { AuthService } from '../../auth.service'; // 👈 import your AuthServic
   templateUrl: './companies.html',
 })
 
-
-
 export class CompaniesComponent implements OnInit {
   companies: any[] = [];
   newCompany = '';
@@ -71,6 +69,7 @@ export class CompaniesComponent implements OnInit {
     this.editingCompany = { ...company };
     this.editedName = company.name;
   }
+
   saveEdit() {
     const id = this.editingCompany.id;
     this.http.put(`/api/admin/companies/${id}`, { name: this.editedName }, { withCredentials: true })
