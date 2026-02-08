@@ -1,9 +1,8 @@
 <h4>Company Users</h4>
 <button
-  type="button"
   class="btn btn-outline-primary btn-sm"
+  *ngIf="isPlatformAdmin || isCompanyAdmin"
   (click)="showAddUser = true"
-  *ngIf="isPlatformAdmin"
 >
   + Add User
 </button>
@@ -11,12 +10,7 @@
 <div class="card p-3 mb-3" *ngIf="showAddUser">
   <h6>Add User</h6>
 
-  <input
-    type="email"
-    class="form-control mb-2"
-    placeholder="Email"
-    [(ngModel)]="newUserEmail"
-  />
+  <input type="email" class="form-control mb-2" placeholder="Email" [(ngModel)]="newUserEmail" />
 
   <div class="row">
     <div class="col">
@@ -28,12 +22,7 @@
       />
     </div>
     <div class="col">
-      <input
-        type="text"
-        class="form-control mb-2"
-        placeholder="Last name"
-        [(ngModel)]="lastName"
-      />
+      <input type="text" class="form-control mb-2" placeholder="Last name" [(ngModel)]="lastName" />
     </div>
   </div>
 
@@ -50,9 +39,7 @@
   </select>
 
   <div class="text-end">
-    <button class="btn btn-secondary btn-sm me-2" (click)="showAddUser = false">
-      Cancel
-    </button>
+    <button class="btn btn-secondary btn-sm me-2" (click)="showAddUser = false">Cancel</button>
     <button
       class="btn btn-primary btn-sm"
       (click)="addUserAsPlatformAdmin()"
@@ -63,11 +50,14 @@
   </div>
 </div>
 
-
+<!-- Company users table -->
+<p class="text-muted" *ngIf="!users.length">No users assigned to this company yet.</p>
 <table class="table table-sm align-middle" *ngIf="users.length">
   <thead>
     <tr>
       <th>Email</th>
+      <th>First Name</th>
+      <th>Last Name</th>
       <th>Name</th>
       <th>Role</th>
       <th class="text-end">Actions</th>
@@ -76,26 +66,44 @@
   <tbody>
     <tr *ngFor="let user of users">
       <td>{{ user.email }}</td>
-      <td>{{ user.name || '—' }}</td>
+      <td>{{ user.firstName }}</td>
+      <td>{{ user.lastName }}</td>
+      <td>{{ user.role }}</td>
       <td>
         <select
           class="form-select form-select-sm"
           [(ngModel)]="user.role"
           (change)="updateUserRole(user)"
-          [disabled]="!isPlatformAdmin"
+          [disabled]="!isPlatformAdmin && !isCompanyAdmin"
         >
           <option value="user">User</option>
           <option value="company_admin">Company Admin</option>
         </select>
       </td>
+
       <td class="text-end">
-        <button
-          class="btn btn-outline-danger btn-sm"
-          (click)="removeUser(user.id)"
-          *ngIf="isPlatformAdmin"
-        >
-          Remove
-        </button>
+        <ng-container *ngIf="userPendingRemoval !== user.id; else confirmDelete">
+          <button
+            class="btn btn-outline-danger btn-sm"
+            *ngIf="isPlatformAdmin || isCompanyAdmin"
+            (click)="userPendingRemoval = user.id"
+          >
+            Remove
+          </button>
+        </ng-container>
+
+        <ng-template #confirmDelete>
+          <span class="text-danger me-2">Remove user?</span>
+          <button
+            class="btn btn-danger btn-sm me-1"
+            (click)="removeUser(user.id); userPendingRemoval = null"
+          >
+            Yes
+          </button>
+          <button class="btn btn-secondary btn-sm" (click)="userPendingRemoval = null">
+            Cancel
+          </button>
+        </ng-template>
       </td>
     </tr>
   </tbody>

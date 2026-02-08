@@ -98,9 +98,53 @@ async function assignUserToCompany(companyId, email, role, res) {
 }
 
 
-router.get("/dashboard", verifyToken, (req, res) => {
-  res.json({ websiteVisits: 1234, leads: 42, conversionRate: "3.4%" });
-});
+// Remove member from own company (company admin)
+router.delete(
+  '/companies/:companyId/members/:userId',
+  verifyToken,
+  async (req, res) => {
+    const { companyId, userId } = req.params;
+    const requester = req.user;
+
+    // Platform admin bypass
+    if (requester.isPlatformAdmin) {
+      return removeUser(companyId, userId, res);
+    }
+
+    // Check company admin access
+    const access = await pool.query(
+      `
+      SELECT role FROM company_users
+      WHERE company_id = $1 AND user_id = $2
+      `,
+      [companyId, requester.userId]
+    );
+
+    const isCompanyAdmin = access.rows.some(r => r.role === 'company_admin');
+    if (!isCompanyAdmin) {
+      return res.status(403).json({ message: 'Not authorized' });
+    }
+
+    return removeUser(companyId, userId, res);
+  }
+);
+
+async function removeUser(companyId, userId, res) {
+  const result = await pool.query(
+    `
+    DELETE FROM company_users
+    WHERE company_id = $1 AND user_id = $2
+    RETURNING id
+    `,
+    [companyId, userId]
+  );
+
+  if (result.rowCount === 0) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+
+  res.json({ success: true });
+}
 
 
 module.exports = router;

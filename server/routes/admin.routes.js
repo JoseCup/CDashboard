@@ -274,35 +274,6 @@ router.put('/companies/:id', verifyToken, async (req, res) => {
 });
 
 
-// Delete company - platform admin only
-router.delete('/companies/:id', verifyToken, async (req, res) => {
-  try {
-    if (req.user.role !== 'platform_admin') {
-      return res.status(403).json({ error: 'Forbidden: not authorized' });
-    }
-
-    const companyId = req.params.id;
-
-    const result = await pool.query(
-      'DELETE FROM companies WHERE id = $1 RETURNING id',
-      [companyId]
-    );
-
-    if (result.rowCount === 0) {
-      return res.status(404).json({ message: 'Company not found' });
-    }
-
-    res.json({ message: 'Company deleted successfully' });
-
-  } catch (e) {
-    console.error('Delete company error:', e);
-    res.status(500).json({ error: 'Failed to delete company' });
-  }
-});
-
-
-
-
 async function assignUserToCompany(companyId, email, role, res) {
   try {
     console.log('➡️ Assigning user', { companyId, email, role });
@@ -339,5 +310,36 @@ async function assignUserToCompany(companyId, email, role, res) {
     res.status(500).json({ message: 'Failed to assign member' });
   }
 }
+
+// Remove user from company - platform admin only
+router.delete(
+  '/companies/:companyId/users/:userId',
+  verifyToken,
+  requirePlatformAdmin,
+  async (req, res) => {
+    const { companyId, userId } = req.params;
+
+    try {
+      const result = await pool.query(
+        `
+        DELETE FROM company_users
+        WHERE company_id = $1 AND user_id = $2
+        RETURNING id
+        `,
+        [companyId, userId]
+      );
+
+      if (result.rowCount === 0) {
+        return res.status(404).json({ message: 'User not found in company' });
+      }
+
+      res.json({ success: true });
+    } catch (err) {
+      console.error('Remove user error:', err);
+      res.status(500).json({ message: 'Failed to remove user' });
+    }
+  }
+);
+
 
 module.exports = router;

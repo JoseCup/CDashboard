@@ -26,7 +26,11 @@ export class CompanyUsersComponent implements OnInit {
   password = '';
   newUserRole = 'user';
 
+  userPendingRemoval: number | null = null; // temp state to track which user is being removed
+
   isPlatformAdmin = false;
+  isCompanyAdmin = false;
+  
 
   constructor(
     private http: HttpClient,
@@ -42,14 +46,25 @@ export class CompanyUsersComponent implements OnInit {
     });
   }
 
-  loadUsers() {
-    this.http
-      .get<any[]>(
-        `/api/admin/companies/${this.companyId}/users`,
-        { withCredentials: true }
-      )
-      .subscribe(users => this.users = users);
-  }
+  // load users of current company and check if current user is company admin
+loadUsers() {
+  this.http
+    .get<any[]>(
+      `/api/admin/companies/${this.companyId}/users`,
+      { withCredentials: true }
+    )
+    .subscribe(users => {
+      this.users = users;
+
+      const currentEmail = this.auth.user?.email;
+      this.isCompanyAdmin = users.some(
+        u => u.email === currentEmail && u.role === 'company_admin'
+      );
+    });
+}
+
+
+
   updateUserRole(user: any) {
   this.http.post(
     `/api/admin/companies/${this.companyId}/users`,
@@ -61,6 +76,18 @@ export class CompanyUsersComponent implements OnInit {
   ).subscribe(() => this.loadUsers());
 }
 
+// companyAdmin update copmany user details - not User account.
+updateCompanyUser(user: any) {
+  this.http.post(
+    `/api/admin/companies/${this.companyId}/users`,
+    {
+      email: user.email,
+      firstName:this.firstName,
+      lastName: this.lastName,
+    },
+    { withCredentials: true }
+  ).subscribe(() => this.loadUsers());
+}
 
   addUserAsPlatformAdmin() {
     this.http.post(
@@ -89,4 +116,19 @@ export class CompanyUsersComponent implements OnInit {
       { withCredentials: true }
     ).subscribe(() => this.loadUsers());
   }
+
+confirmRemoveUser(user: any) {
+  const label = user.email || 'this user';
+
+  const confirmed = confirm(
+    `Are you sure you want to remove ${label} from this company?\n\n` +
+    `They will lose access immediately.`
+  );
+
+  if (!confirmed) return;
+
+  this.removeUser(user.id);
+}
+
+
 }
