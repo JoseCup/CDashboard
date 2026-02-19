@@ -29,6 +29,7 @@ export class CompanyUsersComponent implements OnInit {
   userPendingRemoval: number | null = null; // temp state to track which user is being removed
 
   isPlatformAdmin = false;
+  isPlatformDesigner = false;
   isCompanyAdmin = false;
   
 
@@ -39,7 +40,8 @@ export class CompanyUsersComponent implements OnInit {
 
   ngOnInit() {
     this.auth.loadUser().subscribe(user => {
-      this.isPlatformAdmin = user?.isPlatformAdmin === true;
+      this.isPlatformAdmin = user?.platformRole === 'ADMIN';
+      this.isPlatformDesigner = user?.platformRole === 'DESIGNER';
       if (this.companyId) {
         this.loadUsers();
       }

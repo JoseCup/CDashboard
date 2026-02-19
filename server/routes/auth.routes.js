@@ -21,7 +21,7 @@ router.post('/login', async (req, res) => {
         email,
         password_hash,
         is_active,
-        is_platform_admin
+        platform_role
       FROM users
       WHERE email = $1
       `,
@@ -55,7 +55,7 @@ router.post('/login', async (req, res) => {
     );
 
     // 3. Platform admin does NOT require company membership
-    if (membershipsResult.rows.length === 0 && !user.is_platform_admin) {
+    if (membershipsResult.rows.length === 0 && !user.platform_role) {
       return res.status(403).json({ message: 'No company assigned' });
     }
 
@@ -68,7 +68,7 @@ router.post('/login', async (req, res) => {
       email: user.email,
       companyId: primaryCompany?.company_id ?? null,
       role: primaryCompany?.role ?? null,           // company role only
-      isPlatformAdmin: user.is_platform_admin === true
+      platformRole: user.platform_role ?? null // platform role (ADMIN/DESIGNER) only
     };
 
     const token = jwt.sign(
@@ -91,7 +91,7 @@ router.post('/login', async (req, res) => {
       email: user.email,
       companyId: tokenPayload.companyId,
       role: tokenPayload.role,
-      isPlatformAdmin: tokenPayload.isPlatformAdmin
+      platformRole: tokenPayload.platformRole
     });
 
   } catch (err) {

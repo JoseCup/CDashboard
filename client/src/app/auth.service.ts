@@ -4,12 +4,14 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of, BehaviorSubject, tap, } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+export type PlatformRole = 'ADMIN' | 'DESIGNER' | null;
+
 export interface Me {
   userId: number;
   email: string;
   companyId: number | null;
-  role: string | null;
-  isPlatformAdmin: boolean;
+  role: string | null; // company role
+  platformRole: PlatformRole;
 }
 
 

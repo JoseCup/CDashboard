@@ -17,6 +17,7 @@ export class CompaniesListComponent implements OnInit {
   companies: CompanyListItem[] = [];
   newCompany = '';
   isPlatformAdmin = false;
+  isPlatformDesigner = false;
 
   constructor(
     private http: HttpClient,
@@ -25,9 +26,14 @@ export class CompaniesListComponent implements OnInit {
 
 ngOnInit() {
   this.auth.loadUser().subscribe(user => {
-    this.isPlatformAdmin = user?.isPlatformAdmin === true;
+    this.isPlatformAdmin =  user?.platformRole === 'ADMIN';
+    this.isPlatformDesigner = user?.platformRole === 'DESIGNER';
 
-    if (this.isPlatformAdmin) {
+    console.log('User platform role:', user?.platformRole);
+    console.log('Is Platform Admin:', this.isPlatformAdmin);
+    console.log('Is Platform Designer:', this.isPlatformDesigner);
+
+    if (this.isPlatformAdmin || this.isPlatformDesigner) {
       this.loadCompanies();
     }
   });

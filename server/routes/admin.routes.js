@@ -3,10 +3,11 @@ const router = express.Router();
 const pool = require('../db');
 const verifyToken = require('../middleware/verifyToken');
 const requirePlatformAdmin = require('../middleware/requirePlatformAdmin');
+const requirePlatformStaff = require('../middleware/requirePlatformStaff');
 const bcrypt = require('bcrypt');
 
 // GET all companies - platform admin only
-router.get('/companies', verifyToken, requirePlatformAdmin, async (req, res) => {
+router.get('/companies', verifyToken, requirePlatformStaff, async (req, res) => {
   const result = await pool.query(
     `SELECT id, name, created_at FROM companies ORDER BY created_at DESC`
   );
@@ -17,7 +18,7 @@ router.get('/companies', verifyToken, requirePlatformAdmin, async (req, res) => 
 router.get(
   '/companies/:companyId/users',
   verifyToken,
-  requirePlatformAdmin,
+  requirePlatformStaff,
   async (req, res) => {
     const { companyId } = req.params;
 

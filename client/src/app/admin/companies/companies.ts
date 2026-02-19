@@ -15,12 +15,14 @@ export class CompaniesComponent implements OnInit {
   companies: any[] = [];
   newCompany = '';
   isPlatformAdmin = false;
+  isPlatformDesigner = false;
 
   constructor(private http: HttpClient, private auth: AuthService) { } // 👈 inject AuthService
 
   ngOnInit() {
     this.auth.loadUser().subscribe(user => {
-      this.isPlatformAdmin = user?.role === 'platform_admin';
+      this.isPlatformAdmin = user?.platformRole === 'ADMIN';
+      this.isPlatformDesigner = user?.platformRole === 'DESIGNER';
       this.loadCompanies();
     });
   }

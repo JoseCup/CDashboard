@@ -23,8 +23,8 @@ export class CompanyDetailComponent implements OnInit {
   newUserEmail = '';
   newUserRole = 'user';
 
-
   isPlatformAdmin = false;
+  isPlatformDesigner = false;
 
   constructor(
     private http: HttpClient,
@@ -37,7 +37,8 @@ export class CompanyDetailComponent implements OnInit {
     this.companyId = this.route.snapshot.paramMap.get('companyId')!;
 
     this.auth.loadUser().subscribe(user => {
-      this.isPlatformAdmin = user?.isPlatformAdmin === true;
+      this.isPlatformAdmin = user?.platformRole === 'ADMIN';
+      this.isPlatformDesigner = user?.platformRole === 'DESIGNER';
       this.loadCompany();
     });
   }
