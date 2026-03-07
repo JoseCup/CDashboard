@@ -18,6 +18,7 @@ app.use('/api/companies', require('./routes/companies.routes'));
 app.use('/api/reports', require('./routes/reports.routes'));
 app.use('/api/stats', require('./routes/gsc.routes'));
 app.use('/api/stats', require('./routes/ga4.routes'));
+app.use('/api/campaigns', require('./routes/campaign.routes'));
 app.get('/api/health', (_, res) => res.json({ ok: true }));
 
 app.listen(process.env.PORT || 5000, () =>
