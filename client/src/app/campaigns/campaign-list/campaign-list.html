@@ -1,0 +1,49 @@
+<div class="container">
+  <h1 *ngIf="companyName">{{ companyName }} Campaigns</h1>
+  <h1 *ngIf="!companyName">Campaigns</h1>
+
+  <!-- Create campaign (platform staff only) -->
+
+  <div *ngIf="isPlatformAdmin || isPlatformDesigner" class="create-box">
+    <input [(ngModel)]="newCampaignTitle" placeholder="New campaign title" />
+
+    <button (click)="createCampaign()">Create</button>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Campaign</th>
+        <th>Status</th>
+        <th>Approved</th>
+        <th>Last Updated</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let campaign of campaigns">
+        <td>
+          <a [routerLink]="['/companies', companyId, 'campaigns', campaign.id]">
+            {{ campaign.title }}
+          </a>
+        </td>
+
+        <td>
+          <span *ngIf="campaign.workflow_status === 'DRAFT'"> Draft </span>
+
+          <span *ngIf="campaign.workflow_status === 'READY_FOR_REVIEW'"> Ready for Review </span>
+        </td>
+
+        <td>
+          <span *ngIf="campaign.approved_version"> v{{ campaign.approved_version }} </span>
+
+          <span *ngIf="!campaign.approved_version"> — </span>
+        </td>
+
+        <td>
+          {{ campaign.updated_at | date: 'short' }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

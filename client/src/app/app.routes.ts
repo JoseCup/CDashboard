@@ -44,10 +44,10 @@ export const routes: Routes = [
       .then(m => m.CompaniesListComponent)
 },
 {
-  path: 'admin/companies/:companyId',
+  path: 'admin/companies/:companyId/campaigns',
   loadComponent: () =>
-    import('./admin/companies/company-detail/company-detail')
-      .then(m => m.CompanyDetailComponent)
+    import('./campaigns/campaign-list/campaign-list')
+      .then(m => m.CampaignListComponent)
 },
 {
   path: 'admin/companies/:companyId/users',
@@ -55,8 +55,20 @@ export const routes: Routes = [
     import('./admin/companies/company-users/company-users')
       .then(m => m.CompanyUsersComponent)
 },
-
-  // optional: safety net
+{
+  path: 'admin/companies/:companyId',
+  loadComponent: () =>
+    import('./admin/companies/company-detail/company-detail')
+      .then(m => m.CompanyDetailComponent)
+},
+{
+  path: 'campaigns',
+  loadComponent: () =>
+    import('./campaigns/campaign-list/campaign-list')
+      .then(m => m.CampaignListComponent)
+},
+  // safety net
+  // FIXME Redirect to decorated 404 page instead of home 
   {
     path: '**',
     redirectTo: ''

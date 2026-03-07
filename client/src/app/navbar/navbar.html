@@ -2,12 +2,18 @@
   <a routerLink="/" class="brand">My Dashboard</a>
 
   <ul class="menu">
+
     <li><a routerLink="/">Home</a></li>
 
     <ng-container *ngIf="isLoggedIn$ | async; else loggedOut">
+
       <li><a routerLink="/account">Account</a></li>
 
-      <!-- PLATFORM ADMIN -->
+      <li>
+        <a routerLink="/campaigns">Campaigns</a>
+      </li>
+
+      <!-- PLATFORM STAFF -->
       <li *ngIf="(user$ | async)?.platformRole === 'ADMIN' || (user$ | async)?.platformRole === 'DESIGNER'">
         <a routerLink="/admin/companies">Admin</a>
       </li>
@@ -17,10 +23,12 @@
           Logout
         </button>
       </li>
+
     </ng-container>
 
     <ng-template #loggedOut>
       <li><a routerLink="/login">Login</a></li>
     </ng-template>
+
   </ul>
 </nav>
