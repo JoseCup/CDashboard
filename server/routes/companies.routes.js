@@ -117,7 +117,8 @@ async function assignUserToCompany(companyId, email, role, res) {
 }
 
 
-// Remove member from own company (company admin)
+// Remove a users's membership status from own company (company admin)
+// A member is a user who has a membership in a company and are assigned a role within that company (company_admin or member). A user can be a member of multiple companies with different roles. Removing a member means deleting the company_user record that links them to that company, but does not delete their user account or affect their memberships in other companies. This allows for flexible management of user access across multiple companies without affecting their overall user identity on the platform.
 router.delete(
   '/companies/:companyId/members/:userId',
   verifyToken,

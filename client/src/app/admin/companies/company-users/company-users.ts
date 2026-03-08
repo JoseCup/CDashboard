@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../../auth.service'; 
+import { AuthService } from '../../../auth.service';
 
 
 @Component({
@@ -31,12 +31,12 @@ export class CompanyUsersComponent implements OnInit {
   isPlatformAdmin = false;
   isPlatformDesigner = false;
   isCompanyAdmin = false;
-  
+
 
   constructor(
     private http: HttpClient,
     private auth: AuthService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.auth.loadUser().subscribe(user => {
@@ -49,52 +49,49 @@ export class CompanyUsersComponent implements OnInit {
   }
 
   // load users of current company and check if current user is company admin
-loadUsers() {
-  this.http
-    .get<any[]>(
-      `/api/admin/companies/${this.companyId}/users`,
-      { withCredentials: true }
-    )
-    .subscribe(users => {
-      this.users = users;
+  loadUsers() {
+    this.http
+      .get<any[]>(
+        `/api/admin/companies/${this.companyId}/users`,
+        { withCredentials: true }
+      )
+      .subscribe(users => {
+        this.users = users;
 
-      const currentEmail = this.auth.user?.email;
+        const currentEmail = this.auth.user?.email;
 
-      // Platform admins implicitly have company admin powers
-      this.isCompanyAdmin =
-        this.isPlatformAdmin ||
-        users.some(
-          u => u.email === currentEmail && u.role === 'company_admin'
-        );
-    });
-}
-
-
-
+        // Platform admins implicitly have company admin powers
+        this.isCompanyAdmin =
+          this.isPlatformAdmin ||
+          users.some(
+            u => u.email === currentEmail && u.role === 'company_admin'
+          );
+      });
+  }
 
   updateUserRole(user: any) {
-  this.http.post(
-    `/api/admin/companies/${this.companyId}/users`,
-    {
-      email: user.email,
-      role: user.role
-    },
-    { withCredentials: true }
-  ).subscribe(() => this.loadUsers());
-}
+    this.http.post(
+      `/api/admin/companies/${this.companyId}/users`,
+      {
+        email: user.email,
+        role: user.role
+      },
+      { withCredentials: true }
+    ).subscribe(() => this.loadUsers());
+  }
 
-// companyAdmin update copmany user details - not User account.
-updateCompanyUser(user: any) {
-  this.http.post(
-    `/api/admin/companies/${this.companyId}/users`,
-    {
-      email: user.email,
-      firstName:this.firstName,
-      lastName: this.lastName,
-    },
-    { withCredentials: true }
-  ).subscribe(() => this.loadUsers());
-}
+  // companyAdmin update copmany user details - not User account.
+  updateCompanyUser(user: any) {
+    this.http.post(
+      `/api/admin/companies/${this.companyId}/users`,
+      {
+        email: user.email,
+        firstName: this.firstName,
+        lastName: this.lastName,
+      },
+      { withCredentials: true }
+    ).subscribe(() => this.loadUsers());
+  }
 
   addUserAsPlatformAdmin() {
     this.http.post(
@@ -124,21 +121,21 @@ updateCompanyUser(user: any) {
     ).subscribe(() => this.loadUsers());
   }
 
-confirmRemoveUser(user: any) {
-  const label = user.email || 'this user';
+  confirmRemoveUser(user: any) {
+    const label = user.email || 'this user';
 
-  const confirmed = confirm(
-    `Are you sure you want to remove ${label} from this company?\n\n` +
-    `They will lose access immediately.`
-  );
+    const confirmed = confirm(
+      `Are you sure you want to remove ${label} from this company?\n\n` +
+      `They will lose access immediately.`
+    );
 
-  if (!confirmed) return;
+    if (!confirmed) return;
 
-  this.removeUser(user.id);
-}
+    this.removeUser(user.id);
+  }
 
-isSelf(user: any): boolean {
-  return user.email === this.auth.user?.email;
-}
+  isSelf(user: any): boolean {
+    return user.email === this.auth.user?.email;
+  }
 
 }

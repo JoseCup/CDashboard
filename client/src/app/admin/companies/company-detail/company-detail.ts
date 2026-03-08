@@ -5,6 +5,7 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../auth.service';
 import { CompanyUsersComponent } from '../company-users/company-users';
+import { Campaign } from '../../../models/campaign.model';
 
 @Component({
   selector: 'app-company-detail',
@@ -15,9 +16,12 @@ import { CompanyUsersComponent } from '../company-users/company-users';
 })
 
 export class CompanyDetailComponent implements OnInit {
-  companyId!: string;
+  companyId!: number;
+
   company: any = null;
   users: any[] = [];
+  campaigns: Campaign[] = [];
+
   showAddUser = false;
 
   newUserEmail = '';
@@ -25,6 +29,8 @@ export class CompanyDetailComponent implements OnInit {
 
   isPlatformAdmin = false;
   isPlatformDesigner = false;
+
+  // Campaigns array to hold the company's campaigns
 
   constructor(
     private http: HttpClient,
@@ -34,7 +40,11 @@ export class CompanyDetailComponent implements OnInit {
 
 
   ngOnInit() {
-    this.companyId = this.route.snapshot.paramMap.get('companyId')!;
+    // this.companyId = this.route.snapshot.paramMap.get('companyId')!;
+    this.companyId = Number(this.route.snapshot.paramMap.get('companyId')!);
+
+    this.loadCompany();
+    this.loadCampaigns();
 
     this.auth.loadUser().subscribe(user => {
       this.isPlatformAdmin = user?.platformRole === 'ADMIN';
@@ -43,6 +53,14 @@ export class CompanyDetailComponent implements OnInit {
     });
   }
 
+  // Campaign Loader
+  loadCampaigns() {
+  this.http
+    .get<Campaign[]>(`/api/campaigns/company/${this.companyId}`, { withCredentials: true })
+    .subscribe(data => {
+      this.campaigns = data;
+    });
+}
 
   //  Load company
   loadCompany() {
@@ -128,12 +146,13 @@ export class CompanyDetailComponent implements OnInit {
       )
       .subscribe();
   }
-  removeUser(userId: number) {
-    if (!confirm('Remove this user from the company?')) return;
+
+  removeMember(userId: number) {
+    if (!confirm('Remove this member from the company?')) return;
 
     this.http
       .delete(
-        `/api/admin/companies/${this.companyId}/users/${userId}`,
+        `/api/admin/companies/${this.companyId}/members/${userId}`,
         { withCredentials: true }
       )
       .subscribe(() => this.loadUsers());
