@@ -1,0 +1,41 @@
+<div class="container" *ngIf="campaign">
+  <h1>{{ campaign.title }}</h1>
+
+  <p>Status: {{ campaign.workflow_status }}</p>
+
+  <p>Updated: {{ campaign.updated_at | date: 'short' }}</p>
+
+  <hr />
+
+  <h2>Versions</h2>
+
+  <table class="table">
+    <tr *ngFor="let v of versions">
+      <td>Version {{ v.version_number }}</td>
+
+      <td>
+        <a [href]="v.preview_url" target="_blank"> Preview </a>
+      </td>
+    </tr>
+  </table>
+
+  <hr />
+
+  <h2>Comments</h2>
+
+  <div *ngFor="let c of comments">
+    <strong>{{ c.email }}</strong>
+
+    <p>{{ c.message }}</p>
+
+    <hr />
+  </div>
+
+  <textarea [(ngModel)]="newComment"></textarea>
+
+  <button (click)="addComment()">Comment</button>
+
+  <hr />
+
+  <button *ngIf="isPlatformAdmin" (click)="approveCampaign()">Approve Campaign</button>
+</div>

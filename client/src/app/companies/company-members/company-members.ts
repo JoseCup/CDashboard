@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../../auth.service';
+import { AuthService } from '../../auth.service';
 
 
 @Component({
@@ -26,7 +26,7 @@ export class CompanyMembersComponent implements OnInit {
   constructor(
     private http: HttpClient,
     private auth: AuthService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.auth.loadUser().subscribe(user => {
@@ -40,14 +40,35 @@ export class CompanyMembersComponent implements OnInit {
   }
 
   loadMembers() {
-    this.http
-      .get<any[]>(
-        `/api/admin/companies/${this.companyId}/members`,
-        { withCredentials: true }
-      )
-      .subscribe(data => {
-        this.members = data;
-      });
+
+    // Admin / Designer
+    if (this.isPlatformAdmin || this.isPlatformDesigner) {
+
+      this.http
+        .get<any[]>(
+          `/api/admin/companies/${this.companyId}/users`,
+          { withCredentials: true }
+        )
+        .subscribe(data => {
+          this.members = data;
+        });
+
+    }
+
+    // Customer
+    else {
+
+      this.http
+        .get<any[]>(
+          `/api/companies/users`,
+          { withCredentials: true }
+        )
+        .subscribe(data => {
+          this.members = data;
+        });
+
+    }
+
   }
 
   updateMemberRole(member: any) {

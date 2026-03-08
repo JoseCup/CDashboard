@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../../auth.service';
-import { CompanyListItem } from '../../../models/company.model';
+import { AuthService } from '../../auth.service';
+import { CompanyListItem } from '../../models/company.model';
 
 @Component({
   selector: 'app-companies-list',

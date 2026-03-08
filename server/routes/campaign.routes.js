@@ -30,7 +30,7 @@ router.get('/company/:companyId', verifyToken, async (req, res) => {
 
 
 // Get campaign details
-router.get('/campaigns/:campaignId', verifyToken, async (req, res) => {
+router.get('/:campaignId', verifyToken, async (req, res) => {
   const { campaignId } = req.params;
 
   try {
@@ -73,7 +73,6 @@ router.get('/campaigns/:campaignId', verifyToken, async (req, res) => {
   }
 });
 
-
 // Create campaign
 router.post('/company/:companyId', verifyToken, requirePlatformStaff, async (req, res) => {
   const { companyId } = req.params;
@@ -98,7 +97,7 @@ router.post('/company/:companyId', verifyToken, requirePlatformStaff, async (req
 
 
 // Add version
-router.post('/campaigns/:campaignId/versions', verifyToken, requirePlatformStaff, async (req, res) => {
+router.post('/:campaignId/versions', verifyToken, requirePlatformStaff, async (req, res) => {
 
   const { campaignId } = req.params;
   const { previewUrl, fileType } = req.body;
@@ -139,9 +138,8 @@ router.post('/campaigns/:campaignId/versions', verifyToken, requirePlatformStaff
   }
 });
 
-
 // Add comment
-router.post('/campaigns/:campaignId/comments', verifyToken, async (req, res) => {
+router.post('/:campaignId/comments', verifyToken, async (req, res) => {
 
   const { campaignId } = req.params;
   const { message } = req.body;
@@ -163,9 +161,8 @@ router.post('/campaigns/:campaignId/comments', verifyToken, async (req, res) => 
   }
 });
 
-
 // Approve campaign
-router.post('/campaigns/:campaignId/approve', verifyToken, async (req, res) => {
+router.post('/:campaignId/approve', verifyToken, async (req, res) => {
 
   const { campaignId } = req.params;
 
@@ -197,9 +194,8 @@ router.post('/campaigns/:campaignId/approve', verifyToken, async (req, res) => {
   }
 });
 
-
 // Close campaign
-router.post('/campaigns/:campaignId/close', verifyToken, requirePlatformStaff, async (req, res) => {
+router.post('/:campaignId/close', verifyToken, requirePlatformStaff, async (req, res) => {
 
   const { campaignId } = req.params;
 
@@ -220,6 +216,5 @@ router.post('/campaigns/:campaignId/close', verifyToken, requirePlatformStaff, a
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
 
 module.exports = router;

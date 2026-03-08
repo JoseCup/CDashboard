@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../auth.service'; // 👈 import your AuthService
+import { AuthService } from '../auth.service'; // 👈 import your AuthService
 
 @Component({
   standalone: true,

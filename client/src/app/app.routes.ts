@@ -2,7 +2,8 @@ import { Routes } from '@angular/router';
 import { AuthGuard } from './auth.guard';
 
 export const routes: Routes = [
-  //  ROOT → landing page (HomeComponent)
+
+  // PUBLIC
   {
     path: '',
     loadComponent: () =>
@@ -10,7 +11,6 @@ export const routes: Routes = [
     pathMatch: 'full'
   },
 
-  // ✅ legacy /home → redirect to /
   {
     path: 'home',
     redirectTo: '',
@@ -23,6 +23,7 @@ export const routes: Routes = [
       import('./login/login').then(m => m.LoginComponent)
   },
 
+  // AUTH REQUIRED
   {
     path: 'account',
     canActivate: [AuthGuard],
@@ -30,55 +31,80 @@ export const routes: Routes = [
       import('./account/account').then(m => m.AccountComponent)
   },
 
-  // {
-  //   path: 'admin/companies',
-  //   canActivate: [AuthGuard],
-  //   loadComponent: () =>
-  //     import('./admin/companies/companies')
-  //       .then(m => m.CompaniesComponent)
-  // },
+  {
+    path: 'company',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./companies/company-detail/company-detail')
+        .then(m => m.CompanyDetailComponent)
+  },
 
   {
-  path: 'admin/users',
+    path: 'campaigns',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./campaigns/campaign-list/campaign-list')
+        .then(m => m.CampaignListComponent)
+  },
+
+  // ADMIN AREA
+  {
+    path: 'admin/users',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./admin/users/users-list/users-list')
+        .then(m => m.UsersListComponent)
+  },
+
+  {
+    path: 'admin/companies',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./companies/companies-list/companies-list')
+        .then(m => m.CompaniesListComponent)
+  },
+
+  {
+    path: 'admin/companies/:companyId',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./companies/company-detail/company-detail')
+        .then(m => m.CompanyDetailComponent)
+  },
+
+  {
+    path: 'admin/companies/:companyId/users',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./companies/company-members/company-members')
+        .then(m => m.CompanyMembersComponent)
+  },
+  {
+    path: 'admin/companies/:companyId/campaigns',
+    canActivate: [AuthGuard],
+    loadComponent: () =>
+      import('./campaigns/campaign-list/campaign-list')
+        .then(m => m.CampaignListComponent)
+  },
+  {
+  path: 'companies/:companyId/campaigns/:campaignId',
   canActivate: [AuthGuard],
   loadComponent: () =>
-    import('./admin/users/users-list/users-list')
-      .then(m => m.UsersListComponent)
+    import('./campaigns/campaign-detail/campaign-detail')
+      .then(m => m.CampaignDetailComponent)
 },
+
 {
-  path: 'admin/companies',
+  path: 'admin/companies/:companyId/campaigns/:campaignId',
+  canActivate: [AuthGuard],
   loadComponent: () =>
-    import('./admin/companies/companies-list/companies-list')
-      .then(m => m.CompaniesListComponent)
+    import('./campaigns/campaign-detail/campaign-detail')
+      .then(m => m.CampaignDetailComponent)
 },
-{
-  path: 'admin/companies/:companyId/campaigns',
-  loadComponent: () =>
-    import('./campaigns/campaign-list/campaign-list')
-      .then(m => m.CampaignListComponent)
-},
-{
-  path: 'admin/companies/:companyId/users',
-  loadComponent: () =>
-    import('./admin/companies/company-members/company-members')
-      .then(m => m.CompanyMembersComponent)
-},
-{
-  path: 'admin/companies/:companyId',
-  loadComponent: () =>
-    import('./admin/companies/company-detail/company-detail')
-      .then(m => m.CompanyDetailComponent)
-},
-{
-  path: 'campaigns',
-  loadComponent: () =>
-    import('./campaigns/campaign-list/campaign-list')
-      .then(m => m.CampaignListComponent)
-},
-  // safety net
-  // FIXME Redirect to decorated 404 page instead of home 
+  // fallback
   {
     path: '**',
     redirectTo: ''
   }
+
 ];
