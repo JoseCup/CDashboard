@@ -6,6 +6,46 @@ const pool = require('../db');
 
 const verifyToken = require('../middleware/verifyToken');
 
+// Get members of a company. No companyId required as it comes from their membership in the company_users table. Any member of the company can access this endpoint to see who else is in their company.
+router.get('/members', verifyToken, async (req, res) => {
+
+  const userId = req.user.userId;
+
+  try {
+
+    const result = await pool.query(
+      `
+      SELECT
+        u.id,
+        u.email,
+        u.first_name,
+        u.last_name,
+        cu.role
+      FROM company_users cu
+      JOIN users u ON u.id = cu.user_id
+      WHERE cu.company_id = (
+        SELECT company_id
+        FROM company_users
+        WHERE user_id = $1
+        LIMIT 1
+      )
+      ORDER BY u.email
+      `,
+      [userId]
+    );
+
+    res.json(result.rows);
+
+  } catch (err) {
+
+    console.error('Error loading company members:', err);
+    res.status(500).json({ error: 'server error' });
+
+  }
+
+});
+
+
 // fetch company name
 router.get('/:companyId', verifyToken, async (req, res) => {
 

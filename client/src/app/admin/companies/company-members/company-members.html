@@ -1,0 +1,22 @@
+<h4>Company Members</h4>
+  <!-- Company members table -->
+<p class="text-muted" *ngIf="!members.length">No members assigned to this company yet.</p>
+<table class="table table-sm align-middle" *ngIf="members.length">
+  <thead>
+    <tr>
+      <th>Email</th>
+      <th>First Name</th>
+      <th>Last Name</th>
+      <th>Name</th>
+      <th>Role</th>
+      <th class="text-end">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let member of members">
+      <td>{{ member.email }}</td>
+      <td>{{ member.firstName }}</td>
+      <td>{{ member.lastName }}</td>
+    </tr>
+  </tbody>
+</table>

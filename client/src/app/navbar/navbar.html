@@ -15,6 +15,9 @@
 
       <!-- PLATFORM STAFF -->
       <li *ngIf="(user$ | async)?.platformRole === 'ADMIN' || (user$ | async)?.platformRole === 'DESIGNER'">
+        <a routerLink="/admin/users">Users</a>
+        </li>
+      <li *ngIf="(user$ | async)?.platformRole === 'ADMIN' || (user$ | async)?.platformRole === 'DESIGNER'">
         <a routerLink="/admin/companies">Admin</a>
       </li>
 

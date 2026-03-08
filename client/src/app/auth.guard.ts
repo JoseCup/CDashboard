@@ -24,15 +24,19 @@ export class AuthGuard implements CanActivate {
 
     return this.http.get<any>('/api/auth/me', { withCredentials: true }).pipe(
       map(user => {
-        // Block non-platform admins from /admin routes
-        if (state.url.startsWith('/admin') && user.role !== 'platform_admin') {
-          this.router.navigate(['/account']);
-          return false;
-        }
 
-        // Authenticated + authorized
-        return true;
-      }),
+      if (
+        state.url.startsWith('/admin') &&
+        user.platformRole !== 'ADMIN' &&
+        user.platformRole !== 'DESIGNER'
+      ) {
+        this.router.navigate(['/account']);
+        return false;
+      }
+
+      return true;
+
+    }),
 
       catchError(() => {
         this.router.navigate(['/login']);

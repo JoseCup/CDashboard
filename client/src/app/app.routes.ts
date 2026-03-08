@@ -37,6 +37,14 @@ export const routes: Routes = [
   //     import('./admin/companies/companies')
   //       .then(m => m.CompaniesComponent)
   // },
+
+  {
+  path: 'admin/users',
+  canActivate: [AuthGuard],
+  loadComponent: () =>
+    import('./admin/users/users-list/users-list')
+      .then(m => m.UsersListComponent)
+},
 {
   path: 'admin/companies',
   loadComponent: () =>
@@ -52,8 +60,8 @@ export const routes: Routes = [
 {
   path: 'admin/companies/:companyId/users',
   loadComponent: () =>
-    import('./admin/companies/company-users/company-users')
-      .then(m => m.CompanyUsersComponent)
+    import('./admin/companies/company-members/company-members')
+      .then(m => m.CompanyMembersComponent)
 },
 {
   path: 'admin/companies/:companyId',

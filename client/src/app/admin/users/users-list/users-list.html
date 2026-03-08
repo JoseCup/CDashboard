@@ -1,0 +1,61 @@
+<div class="container">
+
+<h1>Users</h1>
+
+<h3>Create User</h3>
+
+<input [(ngModel)]="newEmail" placeholder="Email">
+
+<input [(ngModel)]="newFirst" placeholder="First name">
+
+<input [(ngModel)]="newLast" placeholder="Last name">
+
+<input [(ngModel)]="newPassword" placeholder="Password">
+
+<select [(ngModel)]="newRole">
+
+<option value="USER">User</option>
+<option value="DESIGNER">Designer</option>
+<option value="ADMIN">Admin</option>
+
+</select>
+
+<button (click)="createUser()">Create</button>
+
+
+<h3>Existing Users</h3>
+
+<table class="table">
+
+<thead>
+<tr>
+<th>Email</th>
+<th>Name</th>
+<th>Role</th>
+<th></th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr *ngFor="let user of users">
+
+<td>{{ user.email }}</td>
+
+<td>
+{{ user.first_name }} {{ user.last_name }}
+</td>
+
+<td>{{ user.platform_role }}</td>
+
+<td>
+<button (click)="deleteUser(user.id)">Delete</button>
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>

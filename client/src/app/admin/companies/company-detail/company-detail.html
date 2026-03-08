@@ -1,65 +1,89 @@
-<div class="container mt-4" *ngIf="company">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>{{ company.name }}</h2>
+<div class="container" *ngIf="company">
 
-    <a routerLink="/admin/companies" class="btn btn-outline-secondary btn-sm">
-      ← Back to Companies
-    </a>
-  </div>
+<h1>{{ company.name }}</h1>
 
-  <form (ngSubmit)="saveCompany()" #companyForm="ngForm">
-    <div class="mb-3">
-      <label class="form-label">Company Name</label>
-      <input
-        type="text"
-        class="form-control"
-        name="name"
-        [(ngModel)]="company.name"
-        [disabled]="!isPlatformAdmin"
-        required
-      />
-    </div>
+<p>
+Website: {{ company.website || '—' }}
+</p>
 
-    <div class="mb-3">
-      <label class="form-label">Website</label>
-      <input
-        type="url"
-        class="form-control"
-        name="website"
-        [(ngModel)]="company.website"
-        placeholder="https://example.com"
-        [disabled]="!isPlatformAdmin"
-      />
-    </div>
+<p>
+Contact: {{ company.contactEmail || '—' }}
+</p>
 
-    <div class="mb-3">
-      <label class="form-label">Contact Email</label>
-      <input
-        type="email"
-        class="form-control"
-        name="contactEmail"
-        [(ngModel)]="company.contactEmail"
-        [disabled]="!isPlatformAdmin"
-      />
-    </div>
+<hr>
 
-    <div class="mb-3 text-muted">
-      <small>Company ID: {{ company.id }}</small>
-    </div>
+<h2>Members</h2>
 
-    <button
-      *ngIf="isPlatformAdmin"
-      type="submit"
-      class="btn btn-primary"
-      [disabled]="!companyForm.form.valid"
-    >
-      Save Changes
-    </button>
-  </form>
-  <hr class="my-5" />
+<table class="table">
 
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <app-company-users *ngIf="company && isPlatformAdmin" [companyId]="company.id">
-    </app-company-users>
-  </div>
+<thead>
+<tr>
+<th>Email</th>
+<th>Role</th>
+<th></th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr *ngFor="let member of members">
+
+<td>{{ member.email }}</td>
+
+<td>
+
+<span *ngIf="member.role === 'company_admin'">
+Company Admin
+</span>
+
+<span *ngIf="member.role === 'member'">
+Member
+</span>
+
+</td>
+
+<td *ngIf="isPlatformAdmin">
+<button (click)="removeMember(member.id)">Remove</button>
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<hr>
+
+<h2>Campaigns</h2>
+
+<table class="table">
+
+<thead>
+<tr>
+<th>Campaign</th>
+<th>Status</th>
+<th>Updated</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr *ngFor="let campaign of campaigns">
+
+<td>
+<a [routerLink]="['/companies', companyId, 'campaigns', campaign.id]">
+{{ campaign.title }}
+</a>
+</td>
+
+<td>{{ campaign.workflow_status }}</td>
+
+<td>{{ campaign.updated_at | date:'short' }}</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 </div>
