@@ -1,0 +1,70 @@
+<h2>Versions</h2>
+
+<div *ngIf="isPlatformDesigner || isPlatformAdmin">
+  <input type="file" (change)="onFileSelected($event)" />
+
+  <input [(ngModel)]="notes" placeholder="Notes" />
+
+  <button (click)="upload()">Upload Version</button>
+</div>
+
+<hr />
+
+<table class="table">
+    <th>Version</th>
+    <th>Preview</th>
+    <th>Notes</th>
+  <tr *ngFor="let v of versions">
+    <td>
+      <strong>Version {{ v.version_number }}</strong>
+
+      <div *ngIf="v.notes" class="text-muted">
+        {{ v.notes }}
+      </div>
+    </td>
+
+    <td>
+        <a
+        *ngIf="v.file_type === 'IMAGE'"
+        [href]="getPreviewUrl(v)"
+        target="_blank"
+        >
+        <img
+            [src]="getPreviewUrl(v)"
+            style="max-width:200px"
+        />
+        </a>
+
+      <a href="getPreviewUrl(v)" target="_blank"
+        >
+        <iframe
+          *ngIf="v.file_type === 'PDF'"
+          [src]="getPreviewUrl(v)"
+          width="200"
+          height="250"
+        ></iframe
+      ></a>
+    </td>
+
+    <div class="version-notes" *ngIf="v.notes">
+  {{ getNoteSnippet(v.notes) }}
+</div>
+    <td>
+      <span *ngIf="campaign.approved_version === v.version_number"> ✅ Approved </span>
+    </td>
+  </tr>
+</table>
+
+<hr />
+
+<h3>Final Deliverables</h3>
+
+<div *ngIf="campaign.dropbox_url">
+  <a [href]="campaign.dropbox_url" target="_blank"> Download Final Files </a>
+</div>
+
+<div *ngIf="isPlatformDesigner || isPlatformAdmin">
+  <input [(ngModel)]="dropboxUrl" placeholder="Dropbox Link" />
+
+  <button (click)="saveDropboxLink()">Save</button>
+</div>

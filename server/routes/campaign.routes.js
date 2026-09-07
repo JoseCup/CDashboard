@@ -1,6 +1,37 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+const storage = multer.diskStorage({
+
+  destination: function (req, file, cb) {
+
+    const campaignId = req.params.campaignId;
+    const dir = `uploads/campaigns/${campaignId}`;
+
+    fs.mkdirSync(dir, { recursive: true });
+
+    cb(null, dir);
+  },
+
+  filename: function (req, file, cb) {
+
+    const ext = path.extname(file.originalname);
+    const filename = `preview_${Date.now()}${ext}`;
+
+    cb(null, filename);
+
+  }
+
+});
+
+const upload = multer({ storage });
+
+
+
 
 const verifyToken = require('../middleware/verifyToken');
 const requirePlatformStaff = require('../middleware/requirePlatformStaff');
@@ -215,6 +246,48 @@ router.post('/:campaignId/close', verifyToken, requirePlatformStaff, async (req,
     console.error('Error closing campaign:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
+});
+
+router.post(
+  '/:campaignId/upload',
+  verifyToken,
+  requirePlatformStaff,
+  upload.single('file'),
+  async (req, res) => {
+
+    const { campaignId } = req.params;
+
+    const previewUrl = `/uploads/campaigns/${campaignId}/${req.file.filename}`;
+    const fileType = req.file.mimetype.includes('pdf') ? 'PDF' : 'IMAGE';
+
+    try {
+
+      const versionResult = await pool.query(
+        `SELECT COALESCE(MAX(version_number),0) + 1 AS next_version
+         FROM campaign_versions
+         WHERE campaign_id = $1`,
+        [campaignId]
+      );
+
+      const nextVersion = versionResult.rows[0].next_version;
+
+      const insert = await pool.query(
+        `INSERT INTO campaign_versions
+         (campaign_id, version_number, preview_url, file_type, uploaded_by, notes)
+         VALUES ($1,$2,$3,$4,$5,$6)
+         RETURNING *`,
+        [campaignId, nextVersion, previewUrl, fileType, req.user.userId, req.body.notes]
+      );
+
+      res.status(201).json(insert.rows[0]);
+
+    } catch (error) {
+
+      console.error(error);
+      res.status(500).json({ error: 'Upload failed' });
+
+    }
+
 });
 
 module.exports = router;

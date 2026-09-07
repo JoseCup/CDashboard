@@ -17,7 +17,7 @@ export class CompaniesComponent implements OnInit {
   isPlatformAdmin = false;
   isPlatformDesigner = false;
 
-  constructor(private http: HttpClient, private auth: AuthService) { } // 👈 inject AuthService
+  constructor(private http: HttpClient, private auth: AuthService) { } 
 
   ngOnInit() {
     this.auth.loadUser().subscribe(user => {

@@ -7,19 +7,17 @@
 
   <hr />
 
-  <h2>Versions</h2>
 
-  <table class="table">
-    <tr *ngFor="let v of versions">
-      <td>Version {{ v.version_number }}</td>
+<app-campaign-version
+  [versions]="versions"
+  [campaign]="campaign"
+  [isPlatformDesigner]="isPlatformDesigner"
+  [isPlatformAdmin]="isPlatformAdmin"
+  (uploadVersion)="uploadVersion($event)"
+  (updateDropbox)="updateDropbox($event)"
+>
+</app-campaign-version>
 
-      <td>
-        <a [href]="v.preview_url" target="_blank"> Preview </a>
-      </td>
-    </tr>
-  </table>
-
-  <hr />
 
   <h2>Comments</h2>
 

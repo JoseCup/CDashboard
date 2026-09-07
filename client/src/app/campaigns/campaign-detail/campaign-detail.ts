@@ -3,13 +3,14 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { CampaignVersionComponent } from '../campaign-version/campaign-version';
 
 import { AuthService } from '../../auth.service';
 
 @Component({
   selector: 'app-campaign-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, CampaignVersionComponent],
   templateUrl: './campaign-detail.html',
   styleUrl: './campaign-detail.css'
 })
@@ -31,7 +32,7 @@ export class CampaignDetailComponent implements OnInit {
     private http: HttpClient,
     private route: ActivatedRoute,
     private auth: AuthService
-  ) {}
+  ) { }
 
   ngOnInit() {
 
@@ -91,5 +92,27 @@ export class CampaignDetailComponent implements OnInit {
       .subscribe(() => this.loadCampaign());
 
   }
+
+uploadVersion(formData: FormData) {
+
+  this.http.post(
+    `/api/campaigns/${this.campaignId}/upload`,
+    formData,
+    { withCredentials: true }
+  )
+  .subscribe(() => this.loadCampaign());
+
+}
+
+updateDropbox(link: string) {
+
+  this.http.post(
+    `/api/campaigns/${this.campaignId}/dropbox`,
+    { dropboxLink: link },
+    { withCredentials: true }
+  )
+  .subscribe(() => this.loadCampaign());
+
+}
 
 }
